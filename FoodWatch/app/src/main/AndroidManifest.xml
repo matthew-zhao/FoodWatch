@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.sharifian.shaheen.foodwatch" >
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-feature android:name="android.hardware.camera" /> <!-- To unrequire camera as part of app, android:required="false", but you also have to check Camera Hardware in activity-->
 
     <application
         android:allowBackup="true"
