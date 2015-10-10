@@ -19,13 +19,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
-/**
 import com.clarifai.api.ClarifaiClient;
 import com.clarifai.api.RecognitionRequest;
 import com.clarifai.api.RecognitionResult;
 import com.clarifai.api.Tag;
-import com.clarifai.api.exception.ClarifaiException; **/
+import com.clarifai.api.exception.ClarifaiException;
 
 public class TaggingActivity extends ActionBarActivity {
     private static final String APP_ID = "u4poK47im7v30avUqTMbK7NGQwJjEPpQ4ezpyzx5";
@@ -43,7 +44,7 @@ public class TaggingActivity extends ActionBarActivity {
 
             File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
             if (pictureFile == null){
-                Log.d(TAG, "Error creating media file, check storage permissions");
+                Log.e(TAG, "Error creating media file, check storage permissions");
                 return;
             }
 
@@ -52,9 +53,9 @@ public class TaggingActivity extends ActionBarActivity {
                 fos.write(data);
                 fos.close();
             } catch (FileNotFoundException e) {
-                Log.d(TAG, "File not found: " + e.getMessage());
+                Log.e(TAG, "File not found: " + e.getMessage());
             } catch (IOException e) {
-                Log.d(TAG, "Error accessing file: " + e.getMessage());
+                Log.e(TAG, "Error accessing file: " + e.getMessage());
             }
         }
     };
@@ -150,7 +151,7 @@ public class TaggingActivity extends ActionBarActivity {
         // Create the storage directory if it does not exist
         if (! mediaStorageDir.exists()){
             if (! mediaStorageDir.mkdirs()){
-                Log.d("MyCameraApp", "failed to create directory");
+                Log.e("MyCameraApp", "failed to create directory");
                 return null;
             }
         }
@@ -169,5 +170,40 @@ public class TaggingActivity extends ActionBarActivity {
         }
 
         return mediaFile;
+    }
+
+    /** Returns Tags for an array of images.
+     *  If there is an error in processing the image, return an empty List of tags.
+     *  If there is no files, return null and logs error. */
+    private static HashMap<File, List<Tag>> getTags(File[] files) {
+        if(files == null) {
+            log.e(TAG, "no Files found in getTags().");
+            return null;
+        }
+        HashMap<File, List<Tag>> result = new HashMap<File, List<Tag>>();
+        //max size for each batch of inputs is 128 images
+        if(files.length > 128) {
+            File[] newFiles = files.copyOfRange(files, 128, files.length - 1);
+            files = files.copyOfRange(files, 0, 127);
+            result.putAll(getTags(newFiles));
+        }
+
+        try {
+            for(File file : files) {
+                List<RecognitionResult> results =
+                        clarifai.recognize(new RecognitionRequest(file));
+                if (result.get(0).getStatusCode() != RecognitionResult.StatusCode.OK) {
+                    log.e(TAG, file.toString() + "'s statuscode is not ok in getTags().");
+                    result.put(file, new List<Tag>());
+                } else {
+                    result.put(file, results.get(0).getTags());
+                }
+            }
+
+        } catch (ClarifaiException e) {
+            Log.e(TAG, "Clarifai error", e);
+            return null;
+        }
+        return result;
     }
 }
