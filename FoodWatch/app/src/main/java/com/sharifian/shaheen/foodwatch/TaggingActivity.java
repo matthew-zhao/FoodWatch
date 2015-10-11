@@ -62,7 +62,7 @@ public class TaggingActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tagging);
+        setContentView(R.layout.content_capture2);
 
         // Create an instance of Camera
         mCamera = getCameraInstance();

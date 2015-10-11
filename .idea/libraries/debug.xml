@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="debug">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/FoodWatch/app/build/intermediates/pre-dexed/debug/internal_impl-22.2.1-9c7ddd160053fc8fb98fb75b264d142fa921bf56.jar!/" />
+      <root url="jar://$PROJECT_DIR$/FoodWatch/app/build/intermediates/pre-dexed/debug/classes-ef6e7ac611610b77bca037f4d923fbffcc78d8de.jar!/" />
+      <root url="jar://$PROJECT_DIR$/FoodWatch/app/build/intermediates/pre-dexed/debug/classes-87d8c2c632d4e172cee0b9f97e17ca09f6ec02f1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/FoodWatch/app/build/intermediates/pre-dexed/debug/classes-f81103df2fd79b60cca897e771bca4925c55d980.jar!/" />
+      <root url="jar://$PROJECT_DIR$/FoodWatch/app/build/intermediates/pre-dexed/debug/support-annotations-22.2.1-a7d00661b39e57112b221614cc2ae3176ff8707e.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
