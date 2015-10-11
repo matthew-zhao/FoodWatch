@@ -1,5 +1,6 @@
 package com.sharifian.shaheen.foodwatch;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
@@ -29,6 +30,8 @@ import com.clarifai.api.RecognitionRequest;
 import com.clarifai.api.RecognitionResult;
 import com.clarifai.api.Tag;
 import com.clarifai.api.exception.ClarifaiException;
+
+import org.w3c.dom.Text;
 
 public class TaggingActivity extends ActionBarActivity {
     private static final String APP_ID = "u4poK47im7v30avUqTMbK7NGQwJjEPpQ4ezpyzx5";
@@ -85,6 +88,10 @@ public class TaggingActivity extends ActionBarActivity {
                     }
                 }
         );
+
+        Text foodName = (Text) findViewById(R.id.foodName);
+        Text calories = (Text) findViewById(R.id.calories);
+        Button takeAnotherPhoto = (Button) findViewById(R.id.takeNewPhoto);
     }
 
 
@@ -170,7 +177,6 @@ public class TaggingActivity extends ActionBarActivity {
         } else {
             return null;
         }
-
         return mediaFile;
     }
 
@@ -207,5 +213,10 @@ public class TaggingActivity extends ActionBarActivity {
             return null;
         }
         return result;
+    }
+
+    public void capturePhotoIntent(View view) {
+        Intent intent = new Intent(this, CaptureActivity.class);
+        startActivity(intent);
     }
 }
