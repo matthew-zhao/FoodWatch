@@ -191,7 +191,7 @@ public class TaggingActivity extends ActionBarActivity {
         try {
             for(File file : files) {
                 List<RecognitionResult> results =
-                        clarifai.recognize(new RecognitionRequest(file));
+                        client.recognize(new RecognitionRequest(file));
                 if (result.get(0).getStatusCode() != RecognitionResult.StatusCode.OK) {
                     log.e(TAG, file.toString() + "'s statuscode is not ok in getTags().");
                     result.put(file, new List<Tag>());
