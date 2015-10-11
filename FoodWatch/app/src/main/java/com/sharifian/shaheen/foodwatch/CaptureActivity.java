@@ -35,7 +35,7 @@ import java.util.Date;
 public class CaptureActivity extends ActionBarActivity {
     private static final String APP_ID = "u4poK47im7v30avUqTMbK7NGQwJjEPpQ4ezpyzx5";
     private static final String APP_SECRET = "TdU7UbHw0-A5-F0yUiIY0KRklvgunEiAFw9A_iJY";
-    private static final String TAG = "TAGGINGACTIVITY";
+    private static final String TAG = "TAGGING  ACTIVITY";
     //private final ClarifaiClient client = new ClarifaiClient(APP_ID, APP_SECRET);
 
     // Storage for camera image URI components
@@ -45,6 +45,7 @@ public class CaptureActivity extends ActionBarActivity {
     // Required for camera operations in order to save the image file on resume.
     private String mCurrentPhotoPath = null;
     private Uri mCapturedImageURI = null;
+    private File mImageFile = null;
 
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
@@ -217,5 +218,8 @@ public class CaptureActivity extends ActionBarActivity {
 
     public void setCapturedImageURI(Uri mCapturedImageURI) {
         this.mCapturedImageURI = mCapturedImageURI;
+    }
+    public File getCapturedFile() {
+        return mImageFile;
     }
 }
