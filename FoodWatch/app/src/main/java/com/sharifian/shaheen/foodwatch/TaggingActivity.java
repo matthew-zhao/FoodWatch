@@ -1,5 +1,6 @@
 package com.sharifian.shaheen.foodwatch;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
@@ -12,30 +13,27 @@ import android.hardware.Camera.*;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Map;
 
-import com.clarifai.api.ClarifaiClient;
-import com.clarifai.api.RecognitionRequest;
-import com.clarifai.api.RecognitionResult;
-import com.clarifai.api.Tag;
-import com.clarifai.api.exception.ClarifaiException;
 
 public class TaggingActivity extends ActionBarActivity {
-    private static final String APP_ID = "u4poK47im7v30avUqTMbK7NGQwJjEPpQ4ezpyzx5";
-    private static final String APP_SECRET = "TdU7UbHw0-A5-F0yUiIY0KRklvgunEiAFw9A_iJY";
-    private static final String TAG = "TAGGINGACTIVITY";
-    private ClarifaiClient client = new ClarifaiClient(APP_ID, APP_SECRET);
-
+    public static final String TAG = "TaggingActivity";
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
     private Camera mCamera;
@@ -65,26 +63,17 @@ public class TaggingActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.content_capture2);
-
-        // Create an instance of Camera
-        mCamera = getCameraInstance();
-
-        // Create our Preview view and set it as the content of our activity.
-        mPreview = new CameraPreview(this, mCamera);
-        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
-
-        Button captureButton = (Button) findViewById(R.id.button_capture);
-        captureButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // get an image from the camera
-                        mCamera.takePicture(null, null, mPicture);
-                    }
-                }
-        );
+        setContentView(R.layout.activity_tagging);
+        Intent intent = getIntent();
+        String food = intent.getStringExtra("Food");
+        String calories = intent.getStringExtra("Calories per 100 gram");
+        String photo = intent.getStringExtra("Photo");
+        TextView foodView = (TextView) findViewById(R.id.textView2);
+        TextView caloriesView = (TextView) findViewById(R.id.textView3);
+        ImageView photoView = (ImageView) findViewById(R.id.photo);
+        foodView.setText(food);
+        caloriesView.setText(calories);
+        photoView.setImageURI(Uri.parse(photo));
     }
 
 
@@ -174,38 +163,119 @@ public class TaggingActivity extends ActionBarActivity {
         return mediaFile;
     }
 
-    /** Returns Tags for an array of images.
-     *  If there is an error in processing the image, return an empty List of tags.
-     *  If there is no files, return null and logs error. */
-    private HashMap<File, List<Tag>> getTags(File[] files) {
-        if(files == null) {
-            Log.e(TAG, "no Files found in getTags().");
-            return null;
-        }
-        HashMap<File, List<Tag>> result = new HashMap<File, List<Tag>>();
-        //max size for each batch of inputs is 128 images
-        if(files.length > 128) {
-            File[] newFiles = Arrays.copyOfRange(files, 128, files.length - 1);
-            files = Arrays.copyOfRange(files, 0, 127);
-            result.putAll(getTags(newFiles));
-        }
-
+    /*
+    //the below functionality is for database stuff
+    private void createDB() {
+        //Manager manager = null;
+        //Database database = null;
         try {
-            for(File file : files) {
-                List<RecognitionResult> results =
-                        client.recognize(new RecognitionRequest(file));
-                if (results.get(0).getStatusCode() != RecognitionResult.StatusCode.OK) {
-                    Log.e(TAG, file.toString() + "'s statuscode is not ok in getTags().");
-                    result.put(file, new ArrayList<Tag>());
-                } else {
-                    result.put(file, results.get(0).getTags());
+            manager = new Manager(new AndroidContext(this), Manager.DEFAULT_OPTIONS);
+            database = manager.getDatabase(DB_NAME);
+            com.couchbase.lite.View viewFoods = database.getView("foods");
+            viewFoods.setMap(new Mapper() {
+                @Override
+                public void map(Map<String, Object> document, Emitter emitter) {
+                    Object tag = document.get("tag");
+                    if (tag != null) {
+                        emitter.emit(tag.toString(), null);
+                    }
                 }
-            }
-
-        } catch (ClarifaiException e) {
-            Log.e(TAG, "Clarifai error", e);
-            return null;
+            }, "1.1.0");
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting database", e);
+            return;
         }
-        return result;
+        //Follows CRUD: Create, Retrieve, Update, Delete (Add?)
+        // Create the document
+
     }
+
+    // We make Manager/Database references singletons
+    public Database getDatabaseInstance() throws CouchbaseLiteException {
+        if ((this.database == null) & (this.manager != null)) {
+            this.database = manager.getDatabase(DB_NAME);
+        }
+        return database;
+    }
+    public Manager getManagerInstance() throws IOException {
+        if (manager == null) {
+            manager = new Manager(new AndroidContext(this), Manager.DEFAULT_OPTIONS);
+        }
+        return manager;
+    }
+
+    public void createTagFood(String tag, HashSet<String> food) {
+        // Create a new document and add date
+        Document document = database.createDocument();
+        //docId = document.getId();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("tag", tag);
+        map.put("food", food);
+        //map.put(tag, food);
+        try {
+            // Save the properties to the document
+            document.putProperties(map);
+        } catch (CouchbaseLiteException e) {
+            Log.e(TAG, "Error putting", e);
+        }
+        //return docId;
+    }
+
+    //ths should actually return a hashset
+    public Object getFood(String tag) {
+        // Finding all documents, then looking ones with that specific tag
+        //Query query = database.createAllDocumentsQuery();
+        Query query = database.getView("foods").createQuery();
+        List<Object> keys = new ArrayList<Object>();
+        keys.add(tag);
+        query.setKeys(keys);
+        QueryEnumerator result = null;
+        try {
+            result = query.run();
+        } catch (CouchbaseLiteException e) {
+            Log.e(TAG, "Error putting", e);
+        }
+        QueryRow row = null;
+        for (Iterator<QueryRow> it = result; it.hasNext(); ) {
+            row = it.next();
+        }
+        Document retrievedDocument = row.getDocument();
+        Map<String, Object> tagToFood = new HashMap<String, Object>();
+        tagToFood.putAll(retrievedDocument.getProperties());
+        return tagToFood.get("food");
+    }
+
+    public void update(String tag, String food) {
+        Query query = database.getView("foods").createQuery();
+        List<Object> keys = new ArrayList<Object>();
+        keys.add(tag);
+        query.setKeys(keys);
+        QueryEnumerator result = null;
+        try {
+            result = query.run();
+        } catch (CouchbaseLiteException e) {
+            Log.e(TAG, "Conflict or something happened", e);
+        }
+        QueryRow row = null;
+        for (Iterator<QueryRow> it = result; it.hasNext(); ) {
+            row = it.next();
+        }
+        //no tag like this was ever created, then we need to create a new document
+        if (row == null) {
+            HashSet<String> newFoods = new HashSet<String>();
+            newFoods.add(food);
+            createTagFood(tag, newFoods);
+        } else {
+            Document document = row.getDocument();
+            try {
+                Map<String, Object> tagToFood = new HashMap<String, Object>(document.getProperties());
+                HashSet<String> foods = (HashSet<String>) tagToFood.get("food");
+                foods.add(food);
+                tagToFood.put("food", food);
+                document.putProperties(tagToFood);
+            } catch (CouchbaseLiteException e) {
+                Log.e(TAG, "Conflict or something happened", e);
+            }
+        }
+    } */
 }

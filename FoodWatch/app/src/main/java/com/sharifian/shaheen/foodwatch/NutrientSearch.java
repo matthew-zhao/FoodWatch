@@ -27,8 +27,14 @@ class Nutrient {
     public String getNutrient(String food_name) {
         NutritionSearch n_search = new NutritionSearch(food_name);
         String ndbno = n_search.search(food_name, 0);
+        if (ndbno.equals("FOOD NOT FOUND")) {
+            return null;
+        }
         IDSearch i_search = new IDSearch(ndbno);
         String label = i_search.energy_retrieve(ndbno);
+        if (label.equals("FOOD NOT FOUND")) {
+            return null;
+        }
         return label;
     }
 
