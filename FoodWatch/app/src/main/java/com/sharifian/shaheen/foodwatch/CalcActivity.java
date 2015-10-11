@@ -1,6 +1,8 @@
 package com.sharifian.shaheen.foodwatch;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -41,7 +43,7 @@ import java.util.Set;
 
 public class CalcActivity extends AppCompatActivity {
     public static final String TAG = "CalcActivity";
-    public static final String DB_NAME = "Food";
+    public static final String DB_NAME = "food";
     protected static Manager manager;
     private Database database;
     //A ProgressDialog object
@@ -60,6 +62,7 @@ public class CalcActivity extends AppCompatActivity {
         photo_path[0] = intent.getStringExtra("CurrentPhotoPath");
         createDB(); //create database
 
+        /*
         String[] tags = {"dairy product", "dairy", "slice", "butter"};
         populate("butter", tags);
         String[] tags2 = {"cheese", "cheddar", "dairy", "milk"};
@@ -91,12 +94,12 @@ public class CalcActivity extends AppCompatActivity {
         String[] tags15 = {"soup", "bowl", "spoon", "broth"};
         populate("soup", tags15);
         String[] tags16 = {"water", "glass", "bottle", "drink", "liquid", "table"};
-        populate("water", tags16);
+        populate("water", tags16);*/
         //Initialize a LoadViewTask object and call the execute() method
         new LoadViewTask().execute(photo_path);
     }
     public void populate(String food, String[] arr) {
-        for (String s: arr) {
+        for (String s : arr) {
             update(s, food);
         }
     }
@@ -194,45 +197,47 @@ public class CalcActivity extends AppCompatActivity {
              * is where the code that is going to be executed on a background
              * thread must be placed.
              */
-            //try
-            //{
-            //Get the current thread's token
-            synchronized (this)
+            String[] results = new String[2];
+            try
             {
-                //getting the photo
-                File[] file_arr = new File[1];
-                //get the uri from the intent which contains extra content from the camera
-                file_arr[0] = new File(photo_path[0]);
-                HashMap<File, List<Tag>> pic_to_tag = getTags(file_arr);
-                if (pic_to_tag == null) {
-                    return null; // an error in clairifai occurred, do something?
+                //Get the current thread's token
+                synchronized (this)
+                {
+                    //getting the photo
+                    File[] file_arr = new File[1];
+                    //get the uri from the intent which contains extra content from the camera
+                    file_arr[0] = new File(photo_path[0]);
+                    HashMap<File, List<Tag>> pic_to_tag = getTags(file_arr);
+                    if (pic_to_tag == null) {
+                        return null; // an error in clairifai occurred, do something?
+                    }
+                    publishProgress(33);
+                    Map<File, String> bestFood = calculate(pic_to_tag); //use daniel's function to calculate the name
+                    String[] foods = new String[bestFood.keySet().size()];
+                    int i = 0;
+                    for (File k : bestFood.keySet()) {
+                        foods[i] = bestFood.get(k);
+                        i++;
+                    }
+                    publishProgress(66);
+                    NutritionSearch dummy = new NutritionSearch();
+                    //calories per 100 grams
+                    String energy_content = dummy.search(foods[0], 0); //just calculate the first for now
+                    if (energy_content == null) {
+                        return null; // an error in food search occured, do something?
+                    }
+                    publishProgress(100);
+                    results = new String[2];
+                    results[0] = foods[0];
+                    results[1] = energy_content;
+                    return results;
                 }
-                publishProgress(33);
-                Map<File, String> bestFood = calculate(pic_to_tag); //use daniel's function to calculate the name
-                String[] foods = new String[bestFood.keySet().size()];
-                int i = 0;
-                for (File k : bestFood.keySet()) {
-                    foods[i] = bestFood.get(k);
-                    i++;
-                }
-                publishProgress(66);
-                NutritionSearch dummy = new NutritionSearch();
-                //calories per 100 grams
-                String energy_content = dummy.search(foods[0], 0); //just calculate the first for now
-                if (energy_content == null) {
-                    return null; // an error in food search occured, do something?
-                }
-                publishProgress(100);
-                String[] results = new String[2];
-                results[0] = foods[0];
-                results[1] = energy_content;
-                return results;
             }
-            //}
-            //catch (InterruptedException e)
-            //{
-            //    e.printStackTrace();
-            //}
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            return results;
         }
 
         //Update the progress
@@ -250,6 +255,10 @@ public class CalcActivity extends AppCompatActivity {
             //close the progress dialog
             progressDialog.dismiss();
             //initialize the View
+
+            if (result[0] == null && result[1] == null) {
+                return;
+            }
 
             Intent intent = new Intent(getApplicationContext(), TaggingActivity.class);
             // TODO: Uncomment when Shaheen finishes this
@@ -379,9 +388,11 @@ public class CalcActivity extends AppCompatActivity {
 
     public void update(String tag, String food) {
         Query query = database.getView("foods").createQuery();
-        List<Object> keys = new ArrayList<Object>();
-        keys.add(tag);
-        query.setKeys(keys);
+        //List<Object> keys = new ArrayList<Object>();
+        //keys.add(tag);
+        //query.setKeys(keys);
+        query.setStartKey(tag);
+        query.setEndKey(tag);
         QueryEnumerator result = null;
         try {
             result = query.run();
@@ -392,6 +403,7 @@ public class CalcActivity extends AppCompatActivity {
         for (Iterator<QueryRow> it = result; it.hasNext(); ) {
             row = it.next();
         }
+        Log.d(TAG, row.toString());
         //no tag like this was ever created, then we need to create a new document
         if (row == null) {
             HashSet<String> newFoods = new HashSet<String>();

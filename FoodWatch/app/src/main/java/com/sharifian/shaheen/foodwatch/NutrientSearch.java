@@ -3,7 +3,7 @@ package com.sharifian.shaheen.foodwatch;
 /**
  * Created by Yiding on 10/10/2015.
  */
-import java.*;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +11,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.lang.StringBuilder;
-import org.json.*;
+import com.google.gson.Gson;
+import com.google.gson.*;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -75,15 +77,13 @@ class NutritionSearch {
     }
 
     public String id_retrieve(int index, String json) {
-        try {
-            JSONObject obj = new JSONObject(json);
-            JSONObject list_arr = obj.getJSONObject("list");
-            JSONObject item_arr = list_arr.getJSONArray("item").getJSONObject(index);
-            String rtn_id = item_arr.getString("ndbno");
-            return rtn_id;
-        } catch  (JSONException e) {
-            return "FOOD NOT FOUND";
-        }
+        JsonParser parser = new JsonParser();
+        JsonElement element = parser.parse(json);
+        JsonObject obj = element.getAsJsonObject();
+        JsonObject list_arr = obj.getAsJsonObject("list");
+        JsonObject item_arr = list_arr.getAsJsonArray("item").get(index).getAsJsonObject();
+        String rtn_id = item_arr.get("ndbno").getAsString();
+        return rtn_id;
     }
 
 }
@@ -105,16 +105,14 @@ class IDSearch extends NutritionSearch {
     }
 
     public String fact_retrieve(String json) {
-        try {
-            JSONObject obj = new JSONObject(json);
-            JSONObject list_arr = obj.getJSONObject("report");
-            JSONObject ingredient_info = list_arr.getJSONObject("food").getJSONArray("nutrients").getJSONObject(2);
-            int measurement = ingredient_info.getInt("value");
-            String rtn = measurement + "" + " kcal per 100 g";
-            return rtn;
-        } catch (JSONException e ){
-            return "FOOD NOT FOUND";
-        }
+        JsonParser parser = new JsonParser();
+        JsonElement element = parser.parse(json);
+        JsonObject obj = element.getAsJsonObject();
+        JsonObject list_arr = obj.getAsJsonObject("report");
+        JsonObject ingredient_info = list_arr.getAsJsonObject("food").getAsJsonArray("nutrients").get(2).getAsJsonObject();
+        int measurement = ingredient_info.getAsJsonPrimitive("value").getAsInt();
+        String rtn = measurement + "" + " kcal per 100 g";
+        return rtn;
     }
 
 }
