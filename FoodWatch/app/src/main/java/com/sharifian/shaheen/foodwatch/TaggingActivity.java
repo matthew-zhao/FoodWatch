@@ -31,7 +31,7 @@ public class TaggingActivity extends ActionBarActivity {
     private static final String APP_ID = "u4poK47im7v30avUqTMbK7NGQwJjEPpQ4ezpyzx5";
     private static final String APP_SECRET = "TdU7UbHw0-A5-F0yUiIY0KRklvgunEiAFw9A_iJY";
     private static final String TAG = "TAGGINGACTIVITY";
-    private final ClarifaiClient client = new ClarifaiClient(APP_ID, APP_SECRET);
+//    private final ClarifaiClient client = new ClarifaiClient(APP_ID, APP_SECRET);
 
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
