@@ -18,9 +18,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Arrays;
 
 import com.clarifai.api.ClarifaiClient;
 import com.clarifai.api.RecognitionRequest;
@@ -32,7 +34,7 @@ public class TaggingActivity extends ActionBarActivity {
     private static final String APP_ID = "u4poK47im7v30avUqTMbK7NGQwJjEPpQ4ezpyzx5";
     private static final String APP_SECRET = "TdU7UbHw0-A5-F0yUiIY0KRklvgunEiAFw9A_iJY";
     private static final String TAG = "TAGGINGACTIVITY";
-//    private final ClarifaiClient client = new ClarifaiClient(APP_ID, APP_SECRET);
+    private ClarifaiClient client = new ClarifaiClient(APP_ID, APP_SECRET);
 
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
@@ -175,16 +177,16 @@ public class TaggingActivity extends ActionBarActivity {
     /** Returns Tags for an array of images.
      *  If there is an error in processing the image, return an empty List of tags.
      *  If there is no files, return null and logs error. */
-    private static HashMap<File, List<Tag>> getTags(File[] files) {
+    private HashMap<File, List<Tag>> getTags(File[] files) {
         if(files == null) {
-            log.e(TAG, "no Files found in getTags().");
+            Log.e(TAG, "no Files found in getTags().");
             return null;
         }
         HashMap<File, List<Tag>> result = new HashMap<File, List<Tag>>();
         //max size for each batch of inputs is 128 images
         if(files.length > 128) {
-            File[] newFiles = files.copyOfRange(files, 128, files.length - 1);
-            files = files.copyOfRange(files, 0, 127);
+            File[] newFiles = Arrays.copyOfRange(files, 128, files.length - 1);
+            files = Arrays.copyOfRange(files, 0, 127);
             result.putAll(getTags(newFiles));
         }
 
@@ -192,9 +194,9 @@ public class TaggingActivity extends ActionBarActivity {
             for(File file : files) {
                 List<RecognitionResult> results =
                         client.recognize(new RecognitionRequest(file));
-                if (result.get(0).getStatusCode() != RecognitionResult.StatusCode.OK) {
-                    log.e(TAG, file.toString() + "'s statuscode is not ok in getTags().");
-                    result.put(file, new List<Tag>());
+                if (results.get(0).getStatusCode() != RecognitionResult.StatusCode.OK) {
+                    Log.e(TAG, file.toString() + "'s statuscode is not ok in getTags().");
+                    result.put(file, new ArrayList<Tag>());
                 } else {
                     result.put(file, results.get(0).getTags());
                 }

@@ -31,5 +31,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.couchbase.lite:couchbase-lite-android:1.1.0'
     compile 'com.android.support:design:22.2.1'
+    compile "com.clarifai:clarifai-api-java:1.1.0"
     compile project(':json-20150729')
 }
