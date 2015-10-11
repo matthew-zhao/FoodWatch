@@ -9,26 +9,41 @@ import android.util.Log;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
+import com.couchbase.lite.Emitter;
 import com.couchbase.lite.Manager;
+import com.couchbase.lite.Mapper;
+import com.couchbase.lite.Query;
+import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.View;
 import com.couchbase.lite.android.AndroidContext;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class CalcActivity extends AppCompatActivity {
     public static final String TAG = "CalcActivity";
     public static final String DB_NAME = "Food";
     protected static Manager manager;
     private Database database;
+    //This is bad practice, but fkin yolo, not enuf time
+    private String docId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calc);
 
-        //createDB();
+        createDB();
     }
 
     @Override
@@ -59,21 +74,23 @@ public class CalcActivity extends AppCompatActivity {
         try {
             manager = new Manager(new AndroidContext(this), Manager.DEFAULT_OPTIONS);
             database = manager.getDatabase(DB_NAME);
+            View viewFoods = database.getView("foods");
+            viewFoods.setMap(new Mapper() {
+                @Override
+                public void map(Map<String, Object> document, Emitter emitter) {
+                    Object tag = document.get("tag");
+                    if (tag != null) {
+                        emitter.emit(tag.toString(), null);
+                    }
+                }
+            }, "1.1.0");
         } catch (Exception e) {
             Log.e(TAG, "Error getting database", e);
             return;
         }
-        //Follows CRUD: Create, Retrieve, Update, Add
+        //Follows CRUD: Create, Retrieve, Update, Delete (Add?)
         // Create the document
-        String documentId = createDocument(database);
-        /* Get and output the contents */
-        outputContents(database, documentId);
-        /* Update the document and add an attachment */
-        updateDoc(database, documentId);
-        // Add an attachment
-        addAttachment(database, documentId);
-        /* Get and output the contents with the attachment */
-        outputContentsWithAttachment(database, documentId);
+        
     }
 
     // We make Manager/Database references singletons
@@ -90,24 +107,79 @@ public class CalcActivity extends AppCompatActivity {
         return manager;
     }
 
-    private void createTagFood(String tag, FoodSet<String> food) {
-        // Create a new document and add data
+    public String createTagFood(String tag, HashSet<String> food) {
+        // Create a new document and add date
         Document document = database.createDocument();
-        String documentId = document.getId();
-        Map<String, FoodSet<String>> map = new HashMap<String, FoodSet<String>>();
-        map.put(tag, food);
+        docId = document.getId();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("tag", tag);
+        map.put("food", food);
+        //map.put(tag, food);
         try {
             // Save the properties to the document
             document.putProperties(map);
         } catch (CouchbaseLiteException e) {
             Log.e(TAG, "Error putting", e);
         }
-        return documentId;
+        return docId;
     }
 
-    private String getFood() {
-
+    //ths should actually return a hashset
+    public Object getFood(String tag) {
+        // Finding all documents, then looking ones with that specific tag
+        //Query query = database.createAllDocumentsQuery();
+        Query query = database.getView("foods").createQuery();
+        List<Object> keys = new ArrayList<Object>();
+        keys.add(tag);
+        query.setKeys(keys);
+        QueryEnumerator result = null;
+        try {
+            result = query.run();
+        } catch (CouchbaseLiteException e) {
+            Log.e(TAG, "Error putting", e);
+        }
+        QueryRow row = null;
+        for (Iterator<QueryRow> it = result; it.hasNext(); ) {
+            row = it.next();
+        }
+        Document retrievedDocument = row.getDocument();
+        Map<String, Object> tagToFood = new HashMap<String, Object>();
+        tagToFood.putAll(retrievedDocument.getProperties());
+        return tagToFood.get("food");
     }
 
-    
+    public void update(String tag, String food) {
+        Query query = database.getView("foods").createQuery();
+        List<Object> keys = new ArrayList<Object>();
+        keys.add(tag);
+        query.setKeys(keys);
+        QueryEnumerator result = null;
+        try {
+            result = query.run();
+        } catch (CouchbaseLiteException e) {
+            Log.e(TAG, "Conflict or something happened", e);
+        }
+        QueryRow row = null;
+        for (Iterator<QueryRow> it = result; it.hasNext(); ) {
+            row = it.next();
+        }
+        //no tag like this was ever created, then we need to create a new document
+        if (row == null) {
+            HashSet<String> newFoods = new HashSet<String>();
+            newFoods.add(food);
+            createTagFood(tag, newFoods);
+        } else {
+            Document document = row.getDocument();
+            try {
+                Map<String, Object> tagToFood = new HashMap<String, Object>(document.getProperties());
+                HashSet<String> foods = (HashSet<String>) tagToFood.get("food");
+                foods.add(food);
+                tagToFood.put("food", food);
+                document.putProperties(tagToFood);
+            } catch (CouchbaseLiteException e) {
+                Log.e(TAG, "Conflict or something happened", e);
+            }
+        }
+    }
+
 }
