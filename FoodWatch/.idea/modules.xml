@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/FoodWatch.iml" filepath="$PROJECT_DIR$/FoodWatch.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/json-20150729/json-20150729.iml" filepath="$PROJECT_DIR$/json-20150729/json-20150729.iml" />
     </modules>
   </component>
 </project>

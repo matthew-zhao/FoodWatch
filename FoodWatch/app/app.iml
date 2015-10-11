@@ -100,6 +100,7 @@
     <orderEntry type="library" exported="" name="support-annotations-22.2.1" level="project" />
     <orderEntry type="library" exported="" name="stateless4j-2.4.0" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-22.2.1" level="project" />
+    <orderEntry type="library" exported="" name="json-20150729" level="project" /> 
     <orderEntry type="library" exported="" name="jackson-databind-2.5.0" level="project" />
     <orderEntry type="library" exported="" name="couchbase-lite-java-core-1.1.0" level="project" />
   </component>
