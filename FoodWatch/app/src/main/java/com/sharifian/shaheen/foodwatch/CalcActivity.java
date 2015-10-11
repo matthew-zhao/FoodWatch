@@ -1,58 +1,58 @@
-//package com.sharifian.shaheen.foodwatch;
-//
-//import android.support.v7.app.AppCompatActivity;
-//import android.os.Bundle;
-//import android.view.Menu;
-//import android.view.MenuItem;
-//import android.util.Log;
-//
-//import com.couchbase.lite.CouchbaseLiteException;
-//import com.couchbase.lite.Database;
-//import com.couchbase.lite.Document;
-//import com.couchbase.lite.Manager;
-//import com.couchbase.lite.android.AndroidContext;
-//
-//import java.io.IOException;
-//import java.util.HashMap;
-//import java.util.HashSet;
-//import java.util.Map;
-//
-//public class CalcActivity extends AppCompatActivity {
-//    public static final String TAG = "CalcActivity";
-//    public static final String DB_NAME = "Food";
-//    protected static Manager manager;
-//    private Database database;
-//
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_calc);
-//
-//        //createDB();
-//    }
-//
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_calc, menu);
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
-//
+package com.sharifian.shaheen.foodwatch;
+
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.util.Log;
+
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.Database;
+import com.couchbase.lite.Document;
+import com.couchbase.lite.Manager;
+import com.couchbase.lite.android.AndroidContext;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
+public class CalcActivity extends AppCompatActivity {
+    public static final String TAG = "CalcActivity";
+    public static final String DB_NAME = "Food";
+    protected static Manager manager;
+    private Database database;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_calc);
+
+        //createDB();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_calc, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
 //    private void createDB() {
 //        //Manager manager = null;
 //        //Database database = null;
@@ -108,6 +108,6 @@
 //    private String getFood() {
 //
 //    }
-//
-//
-//}
+
+
+}

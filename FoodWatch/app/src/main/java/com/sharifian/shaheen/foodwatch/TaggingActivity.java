@@ -1,5 +1,6 @@
 package com.sharifian.shaheen.foodwatch;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
@@ -62,6 +63,8 @@ public class TaggingActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent intent = new Intent(this,CaptureActivity.class);
+        startActivity(intent);
         setContentView(R.layout.content_capture2);
 
         // Create an instance of Camera
@@ -79,6 +82,7 @@ public class TaggingActivity extends ActionBarActivity {
                     public void onClick(View v) {
                         // get an image from the camera
                         mCamera.takePicture(null, null, mPicture);
+
                     }
                 }
         );
