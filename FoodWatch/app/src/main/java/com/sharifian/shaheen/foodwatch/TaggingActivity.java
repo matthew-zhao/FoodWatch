@@ -38,7 +38,7 @@ public class TaggingActivity extends ActionBarActivity {
     private Camera mCamera;
     private CameraPreview mPreview;
     private PictureCallback mPicture = new PictureCallback() {
-        @Override
+//        @Override
         public void onPictureTaken(byte[] data, Camera camera) {
 
             File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
