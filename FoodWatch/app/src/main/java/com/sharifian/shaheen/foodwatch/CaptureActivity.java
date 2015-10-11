@@ -25,18 +25,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/**
- import com.clarifai.api.ClarifaiClient;
- import com.clarifai.api.RecognitionRequest;
- import com.clarifai.api.RecognitionResult;
- import com.clarifai.api.Tag;
- import com.clarifai.api.exception.ClarifaiException; **/
-
 public class CaptureActivity extends ActionBarActivity {
-    private static final String APP_ID = "u4poK47im7v30avUqTMbK7NGQwJjEPpQ4ezpyzx5";
-    private static final String APP_SECRET = "TdU7UbHw0-A5-F0yUiIY0KRklvgunEiAFw9A_iJY";
     private static final String TAG = "TAGGING  ACTIVITY";
-    //private final ClarifaiClient client = new ClarifaiClient(APP_ID, APP_SECRET);
 
     // Storage for camera image URI components
     private final static String CAPTURED_PHOTO_PATH_KEY = "mCurrentPhotoPath";

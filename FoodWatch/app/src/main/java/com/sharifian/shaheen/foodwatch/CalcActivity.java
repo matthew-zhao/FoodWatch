@@ -58,8 +58,47 @@ public class CalcActivity extends AppCompatActivity {
         setContentView(R.layout.activity_calc);
         Intent intent = getIntent();
         photo_path[0] = intent.getStringExtra("CurrentPhotoPath");
+        createDB(); //create database
+
+        String[] tags = {"dairy product", "dairy", "slice", "butter"};
+        populate("butter", tags);
+        String[] tags2 = {"cheese", "cheddar", "dairy", "milk"};
+        populate("cheese", tags2);
+        String[] tags3 = {"milk", "drink", "glass", "breakfast", "yogurt"};
+        populate("milk", tags3);
+        String[] tags4 = {"bread", "wheat", "loaf", "food", "flour", "slice", "bakery"};
+        populate("bread", tags4);
+        String[] tags5 = {"pork", "meat", "cooking", "dish"};
+        populate("pork", tags5);
+        String[] tags6 = {"tenderloin", "beef", "sirloin", "fillet", "rare", "meat"};
+        populate("steak", tags6);
+        String[] tags7 = {"egg", "breakfast", "egg yolk", "nutrition", "cholesterol"};
+        populate("egg", tags7);
+        String[] tags8 = {"candy", "color", "motley", "confection", "sugar", "assortment"};
+        populate("candy", tags8);
+        String[] tags9 = {"spaghetti", "cuisine", "lunch", "sauce", "tomato"};
+        populate("spaghetti", tags9);
+        String[] tags10 = {"tomato", "fruit", "vegetable", "healthy"};
+        populate("tomato", tags10);
+        String[] tags11 = {"sandwich", "bread", "ham", "fast", "bun"};
+        populate("sandwich", tags11);
+        String[] tags12 = {"chicken", "poultry", "food", "sauce"};
+        populate("chicken", tags12);
+        String[] tags13 = {"salad", "healthy", "vegetable", "diet"};
+        populate("lettuce", tags13);
+        String[] tags14 = {"salad", "tomato", "nutrition", "lollies"};
+        populate("salad", tags14);
+        String[] tags15 = {"soup", "bowl", "spoon", "broth"};
+        populate("soup", tags15);
+        String[] tags16 = {"water", "glass", "bottle", "drink", "liquid", "table"};
+        populate("water", tags16);
         //Initialize a LoadViewTask object and call the execute() method
         new LoadViewTask().execute(photo_path);
+    }
+    public void populate(String food, String[] arr) {
+        for (String s: arr) {
+            update(s, food);
+        }
     }
 
     /** Returns Tags for an array of images.
@@ -169,7 +208,6 @@ public class CalcActivity extends AppCompatActivity {
                     return null; // an error in clairifai occurred, do something?
                 }
                 publishProgress(33);
-                createDB(); //create database
                 Map<File, String> bestFood = calculate(pic_to_tag); //use daniel's function to calculate the name
                 String[] foods = new String[bestFood.keySet().size()];
                 int i = 0;
