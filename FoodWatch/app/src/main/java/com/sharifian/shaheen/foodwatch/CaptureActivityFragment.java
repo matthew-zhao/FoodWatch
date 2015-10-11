@@ -267,11 +267,9 @@ public class CaptureActivityFragment extends BaseFragment {
                 // preview surface does not exist
                 return;
             }
-
+            Camera.Parameters parameters = mCamera.getParameters();
             // stop preview before making changes
             try {
-                Camera.Parameters parameters = mCamera.getParameters();
-
                 // Set the auto-focus mode to "continuous"
                 parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
 
@@ -441,7 +439,6 @@ public class CaptureActivityFragment extends BaseFragment {
         File mediaFile;
         mediaFile = new File(mediaStorageDir.getPath() + File.separator +
                 "IMG_"+ timeStamp + ".jpg");
-
 
         return mediaFile;
     }
