@@ -1,22 +1,18 @@
 package com.sharifian.shaheen.foodwatch;
 
-import android.support.v4.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.content.Context;
 import android.hardware.Camera;
-import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
-import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -79,6 +75,7 @@ public class CaptureActivityFragment extends BaseFragment {
                     public void onClick(View v) {
                         // get an image from the camera
                         mCamera.takePicture(null, null, mPicture);
+
                     }
                 }
         );
@@ -99,7 +96,7 @@ public class CaptureActivityFragment extends BaseFragment {
         qOpened = (mCamera != null);
 
         if(qOpened == true){
-            mPreview = new CameraPreview(getActivity().getBaseContext(), mCamera,view);
+            mPreview = new CameraPreview(getActivity().getBaseContext(), mCamera, view);
             FrameLayout preview = (FrameLayout) view.findViewById(R.id.camera_preview);
             preview.addView(mPreview);
             mPreview.startCameraPreview();
@@ -152,8 +149,6 @@ public class CaptureActivityFragment extends BaseFragment {
     /**
      * Surface on which the camera projects it's capture results. This is derived both from Google's docs and the
      * excellent StackOverflow answer provided below.
-     *
-     * Reference / Credit: http://stackoverflow.com/questions/7942378/android-camera-will-not-work-startpreview-fails
      */
     class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
 
@@ -237,6 +232,8 @@ public class CaptureActivityFragment extends BaseFragment {
         public void surfaceCreated(SurfaceHolder holder) {
             try {
                 mCamera.setPreviewDisplay(holder);
+                mCamera.startPreview();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -267,9 +264,11 @@ public class CaptureActivityFragment extends BaseFragment {
                 // preview surface does not exist
                 return;
             }
-            Camera.Parameters parameters = mCamera.getParameters();
+
             // stop preview before making changes
             try {
+                Camera.Parameters parameters = mCamera.getParameters();
+
                 // Set the auto-focus mode to "continuous"
                 parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
 
