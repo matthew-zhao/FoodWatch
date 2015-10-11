@@ -103,6 +103,12 @@ public class CaptureActivity extends ActionBarActivity {
         Intent intent = new Intent(this, CalcActivity.class);
         intent.putExtra("CurrentPhotoPath", mCurrentPhotoPath);
 
+
+        Intent fileIntent = new Intent(this, CalcActivity.class);
+        fileIntent.putExtra("ImageFile", mImageFile);
+
+        startActivity(intent);
+        startActivity(fileIntent);
     }
 
     public void displayConfirmation() {
