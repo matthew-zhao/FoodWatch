@@ -32,6 +32,8 @@ import java.util.Arrays;
 import java.util.Map;
 
 
+import org.w3c.dom.Text;
+
 public class TaggingActivity extends ActionBarActivity {
     public static final String TAG = "TaggingActivity";
     public static final int MEDIA_TYPE_IMAGE = 1;
@@ -63,13 +65,13 @@ public class TaggingActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tagging);
+        setContentView(R.layout.results);
         Intent intent = getIntent();
         String food = intent.getStringExtra("Food");
         String calories = intent.getStringExtra("Calories per 100 gram");
         String photo = intent.getStringExtra("Photo");
-        TextView foodView = (TextView) findViewById(R.id.textView2);
-        TextView caloriesView = (TextView) findViewById(R.id.textView3);
+        TextView foodView = (TextView) findViewById(R.id.foodName);
+        TextView caloriesView = (TextView) findViewById(R.id.calories);
         ImageView photoView = (ImageView) findViewById(R.id.photo);
         foodView.setText(food);
         caloriesView.setText(calories);
@@ -159,123 +161,11 @@ public class TaggingActivity extends ActionBarActivity {
         } else {
             return null;
         }
-
         return mediaFile;
     }
 
-    /*
-    //the below functionality is for database stuff
-    private void createDB() {
-        //Manager manager = null;
-        //Database database = null;
-        try {
-            manager = new Manager(new AndroidContext(this), Manager.DEFAULT_OPTIONS);
-            database = manager.getDatabase(DB_NAME);
-            com.couchbase.lite.View viewFoods = database.getView("foods");
-            viewFoods.setMap(new Mapper() {
-                @Override
-                public void map(Map<String, Object> document, Emitter emitter) {
-                    Object tag = document.get("tag");
-                    if (tag != null) {
-                        emitter.emit(tag.toString(), null);
-                    }
-                }
-            }, "1.1.0");
-        } catch (Exception e) {
-            Log.e(TAG, "Error getting database", e);
-            return;
-        }
-        //Follows CRUD: Create, Retrieve, Update, Delete (Add?)
-        // Create the document
-
+    public void capturePhotoIntent(View view) {
+        Intent intent = new Intent(this, CaptureActivity.class);
+        startActivity(intent);
     }
-
-    // We make Manager/Database references singletons
-    public Database getDatabaseInstance() throws CouchbaseLiteException {
-        if ((this.database == null) & (this.manager != null)) {
-            this.database = manager.getDatabase(DB_NAME);
-        }
-        return database;
-    }
-    public Manager getManagerInstance() throws IOException {
-        if (manager == null) {
-            manager = new Manager(new AndroidContext(this), Manager.DEFAULT_OPTIONS);
-        }
-        return manager;
-    }
-
-    public void createTagFood(String tag, HashSet<String> food) {
-        // Create a new document and add date
-        Document document = database.createDocument();
-        //docId = document.getId();
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("tag", tag);
-        map.put("food", food);
-        //map.put(tag, food);
-        try {
-            // Save the properties to the document
-            document.putProperties(map);
-        } catch (CouchbaseLiteException e) {
-            Log.e(TAG, "Error putting", e);
-        }
-        //return docId;
-    }
-
-    //ths should actually return a hashset
-    public Object getFood(String tag) {
-        // Finding all documents, then looking ones with that specific tag
-        //Query query = database.createAllDocumentsQuery();
-        Query query = database.getView("foods").createQuery();
-        List<Object> keys = new ArrayList<Object>();
-        keys.add(tag);
-        query.setKeys(keys);
-        QueryEnumerator result = null;
-        try {
-            result = query.run();
-        } catch (CouchbaseLiteException e) {
-            Log.e(TAG, "Error putting", e);
-        }
-        QueryRow row = null;
-        for (Iterator<QueryRow> it = result; it.hasNext(); ) {
-            row = it.next();
-        }
-        Document retrievedDocument = row.getDocument();
-        Map<String, Object> tagToFood = new HashMap<String, Object>();
-        tagToFood.putAll(retrievedDocument.getProperties());
-        return tagToFood.get("food");
-    }
-
-    public void update(String tag, String food) {
-        Query query = database.getView("foods").createQuery();
-        List<Object> keys = new ArrayList<Object>();
-        keys.add(tag);
-        query.setKeys(keys);
-        QueryEnumerator result = null;
-        try {
-            result = query.run();
-        } catch (CouchbaseLiteException e) {
-            Log.e(TAG, "Conflict or something happened", e);
-        }
-        QueryRow row = null;
-        for (Iterator<QueryRow> it = result; it.hasNext(); ) {
-            row = it.next();
-        }
-        //no tag like this was ever created, then we need to create a new document
-        if (row == null) {
-            HashSet<String> newFoods = new HashSet<String>();
-            newFoods.add(food);
-            createTagFood(tag, newFoods);
-        } else {
-            Document document = row.getDocument();
-            try {
-                Map<String, Object> tagToFood = new HashMap<String, Object>(document.getProperties());
-                HashSet<String> foods = (HashSet<String>) tagToFood.get("food");
-                foods.add(food);
-                tagToFood.put("food", food);
-                document.putProperties(tagToFood);
-            } catch (CouchbaseLiteException e) {
-                Log.e(TAG, "Conflict or something happened", e);
-            }
-        }
-    } */
 }
