@@ -8,14 +8,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.lang.StringBuilder;
 import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import com.google.gson.*;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+
+import android.util.Log;
 
 class Nutrient {
 
@@ -72,13 +77,18 @@ class NutritionSearch {
             NutritionSearch n_search = new NutritionSearch(food_name);
             DownloadJson json = new DownloadJson(this._complete_url);
             String nutrition_json = json.download();
-            String food_id = id_retrieve(index, nutrition_json);
+            String food_id = null;
+            if (nutrition_json != null) {
+                food_id = id_retrieve(index, nutrition_json);
+            }
             return food_id;
     }
 
     public String id_retrieve(int index, String json) {
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setLenient(true);
         JsonParser parser = new JsonParser();
-        JsonElement element = parser.parse(json);
+        JsonElement element = parser.parse(reader);
         JsonObject obj = element.getAsJsonObject();
         JsonObject list_arr = obj.getAsJsonObject("list");
         JsonObject item_arr = list_arr.getAsJsonArray("item").get(index).getAsJsonObject();
@@ -105,8 +115,10 @@ class IDSearch extends NutritionSearch {
     }
 
     public String fact_retrieve(String json) {
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setLenient(true);
         JsonParser parser = new JsonParser();
-        JsonElement element = parser.parse(json);
+        JsonElement element = parser.parse(reader);
         JsonObject obj = element.getAsJsonObject();
         JsonObject list_arr = obj.getAsJsonObject("report");
         JsonObject ingredient_info = list_arr.getAsJsonObject("food").getAsJsonArray("nutrients").get(2).getAsJsonObject();
@@ -119,7 +131,7 @@ class IDSearch extends NutritionSearch {
 
 class DownloadJson {
     String _url;
-
+    public static final String TAG = "Nutrient Search";
     public DownloadJson(String url) {
         this._url = url;
     }
@@ -138,7 +150,7 @@ class DownloadJson {
                 output.append(line);
             }
         } catch (IOException e) {
-            return "DOWNLOAD ERROR";
+            Log.e(TAG, "DOWNLOAD ERROR");
         }
 
         return output.toString();

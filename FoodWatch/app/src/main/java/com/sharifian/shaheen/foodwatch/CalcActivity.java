@@ -279,7 +279,11 @@ public class CalcActivity extends AppCompatActivity {
             Map<String, Integer> frequency = new HashMap<String, Integer>();
             for (Tag tag : tags) {
                 String tagString = tag.toString();
-                Set<String> results = (HashSet<String>) getFood(tagString); //todo
+                Object o = getFood(tagString); //todo
+                if (o == null) {
+                    continue;
+                }
+                Set<String> results = (HashSet<String>) o;
                 for (String s : results) {
                     if (!frequency.containsKey(s)) {
                         frequency.put(s, 0);
@@ -379,6 +383,9 @@ public class CalcActivity extends AppCompatActivity {
         QueryRow row = null;
         for (Iterator<QueryRow> it = result; it.hasNext(); ) {
             row = it.next();
+        }
+        if (row == null) {
+            return null;
         }
         Document retrievedDocument = row.getDocument();
         Map<String, Object> tagToFood = new HashMap<String, Object>();

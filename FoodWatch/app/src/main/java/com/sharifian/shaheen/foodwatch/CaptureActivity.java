@@ -60,6 +60,7 @@ public class CaptureActivity extends ActionBarActivity {
             } catch (IOException e) {
                 Log.d(TAG, "Error accessing file: " + e.getMessage());
             }
+            mCurrentPhotoPath = pictureFile.getPath();
         }
     };
 
@@ -90,27 +91,36 @@ public class CaptureActivity extends ActionBarActivity {
     public void capturePhoto(View v) {
         mCamera.takePicture(null, null, mPicture);
         displayConfirmation();
-        Intent intent = new Intent(this, CalcActivity.class);
-        intent.putExtra("CurrentPhotoPath", mCurrentPhotoPath);
 
-        Intent fileIntent = new Intent(this, CalcActivity.class);
-        fileIntent.putExtra("ImageFile", mImageFile);
-
-        startActivity(intent);
-        startActivity(fileIntent);
     }
 
     public void displayConfirmation() {
-        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setTitle("Are you sure?");
-        alertDialog.setMessage("Do you wish to use this picture?");
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(CaptureActivity.this);
+        alertDialog.setMessage("Do you wish to use this picture?").setCancelable(false);
+        alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // Action for 'Yes' Button
+                Intent intent = new Intent(getBaseContext(), CalcActivity.class);
+                intent.putExtra("CurrentPhotoPath", mCurrentPhotoPath);
+                //intent.putExtra("ImageFile", mImageFile);
+
+                startActivity(intent);
+            }
+        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
                 dialog.dismiss();
             }
         });
+        //alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
+        //    @Override
+        //    public void onClick(DialogInterface dialog, int which) {
+        //        dialog.dismiss();
+        //    }
+        //});
         alertDialog.show();
+        AlertDialog alert = alertDialog.create();
+        alertDialog.setTitle("Are you sure?");
+        alert.show();
     }
 
     @Override
@@ -143,6 +153,8 @@ public class CaptureActivity extends ActionBarActivity {
 
     private void releaseCamera(){
         if (mCamera != null){
+            mCamera.setPreviewCallback(null);
+            mPreview.getHolder().removeCallback(mPreview);
             mCamera.release();        // release the camera for other applications
             mCamera = null;
         }
