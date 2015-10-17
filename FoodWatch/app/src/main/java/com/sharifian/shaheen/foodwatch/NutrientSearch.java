@@ -89,11 +89,14 @@ class NutritionSearch {
         reader.setLenient(true);
         JsonParser parser = new JsonParser();
         JsonElement element = parser.parse(reader);
-        JsonObject obj = element.getAsJsonObject();
-        JsonObject list_arr = obj.getAsJsonObject("list");
-        JsonObject item_arr = list_arr.getAsJsonArray("item").get(index).getAsJsonObject();
-        String rtn_id = item_arr.get("ndbno").getAsString();
-        return rtn_id;
+        if (!element.equals("null")) {
+            JsonObject obj = element.getAsJsonObject();
+            JsonObject list_arr = obj.getAsJsonObject("list");
+            JsonObject item_arr = list_arr.getAsJsonArray("item").get(index).getAsJsonObject();
+            String rtn_id = item_arr.get("ndbno").getAsString();
+            return rtn_id;
+        }
+        return null;
     }
 
 }

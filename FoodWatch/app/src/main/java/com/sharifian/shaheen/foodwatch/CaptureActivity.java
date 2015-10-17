@@ -12,9 +12,11 @@ import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
@@ -41,6 +43,8 @@ public class CaptureActivity extends ActionBarActivity {
     public static final int MEDIA_TYPE_VIDEO = 2;
     private Camera mCamera;
     private CameraPreview mPreview;
+    // Reference to the containing view.
+    private View mCameraView;
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
         //        @Override
         public void onPictureTaken(byte[] data, Camera camera) {
@@ -64,11 +68,32 @@ public class CaptureActivity extends ActionBarActivity {
         }
     };
 
+    /**
+     * Recommended "safe" way to open the camera.
+     * @param view
+     * @return
+     */
+    private boolean safeCameraOpenInView(View view) {
+        boolean qOpened = false;
+        releaseCameraAndPreview();
+        mCamera = getCameraInstance();
+        mCameraView = view;
+        qOpened = (mCamera != null);
+
+        if(qOpened == true){
+            mPreview = new CameraPreview(getBaseContext(), mCamera, view);
+            FrameLayout preview = (FrameLayout) view.findViewById(R.id.camera_preview);
+            preview.addView(mPreview);
+            mPreview.startCameraPreview();
+        }
+        return qOpened;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_capture2);
-
+        //View view = inflater.inflate(R.layout.content_capture2, container, false);
         // Create an instance of Camera
         mCamera = getCameraInstance();
 
@@ -148,15 +173,19 @@ public class CaptureActivity extends ActionBarActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        releaseCamera();              // release the camera immediately on pause event
+        releaseCameraAndPreview();              // release the camera immediately on pause event
     }
 
-    private void releaseCamera(){
+    private void releaseCameraAndPreview() {
         if (mCamera != null){
             mCamera.setPreviewCallback(null);
             mPreview.getHolder().removeCallback(mPreview);
             mCamera.release();        // release the camera for other applications
             mCamera = null;
+        }
+        if(mPreview != null){
+            mPreview.destroyDrawingCache();
+            mPreview.mCamera = null;
         }
     }
 

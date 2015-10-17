@@ -220,7 +220,7 @@ public class CalcActivity extends AppCompatActivity {
                         i++;
                     }
                     publishProgress(66);
-                    NutritionSearch dummy = new NutritionSearch();
+                    NutritionSearch dummy = new NutritionSearch(foods[0]);
                     //calories per 100 grams
                     String energy_content = dummy.search(foods[0], 0); //just calculate the first for now
                     if (energy_content == null) {

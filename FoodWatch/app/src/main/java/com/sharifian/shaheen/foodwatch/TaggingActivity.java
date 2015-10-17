@@ -69,7 +69,7 @@ public class TaggingActivity extends ActionBarActivity {
         Intent intent = getIntent();
         String food = intent.getStringExtra("Food");
         String calories = intent.getStringExtra("Calories per 100 gram");
-        String photo = intent.getStringExtra("Photo");
+        String photo = intent.getStringArrayExtra("Photo")[0];
         TextView foodView = (TextView) findViewById(R.id.foodName);
         TextView caloriesView = (TextView) findViewById(R.id.calories);
         ImageView photoView = (ImageView) findViewById(R.id.photo);
