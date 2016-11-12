@@ -48,9 +48,11 @@ public final class RecognizeConceptsActivity extends BaseActivity {
   @BindView(R.id.switcher) ViewSwitcher switcher;
 
   // the FAB that the user clicks to select an image
-  @BindView(R.id.fab) View fab;
+  @BindView(R.id.fab_upload) View fab_upload;
+  @BindView(R.id.fab_camera) View fab_camera;
 
-  @NonNull
+
+    @NonNull
   private final RecognizeConceptsAdapter adapter = new RecognizeConceptsAdapter();
 
   @Override
@@ -67,7 +69,7 @@ public final class RecognizeConceptsActivity extends BaseActivity {
     resultsList.setAdapter(adapter);
   }
 
-  @OnClick(R.id.fab)
+  @OnClick(R.id.fab_upload)
   void pickImage() {
     startActivityForResult(new Intent(Intent.ACTION_PICK).setType("image/*"), PICK_IMAGE);
   }
@@ -142,7 +144,7 @@ public final class RecognizeConceptsActivity extends BaseActivity {
       public void run() {
         switcher.setDisplayedChild(busy ? 1 : 0);
         imageView.setVisibility(busy ? GONE : VISIBLE);
-        fab.setEnabled(!busy);
+        fab_upload.setEnabled(!busy);
       }
     });
   }
