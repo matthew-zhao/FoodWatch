@@ -24,11 +24,15 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <FrameLayout
-        android:id="@+id/camera_preview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1"
+    <TextView
+        android:id="@+id/textview"
+        android:text="Dummy"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_weight="0.4"
         />
 
 

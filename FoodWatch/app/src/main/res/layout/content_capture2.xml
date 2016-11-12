@@ -2,28 +2,47 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
-    <FrameLayout
-        android:id="@+id/camera_preview"
+    <Button
+        android:id="@+id/button_capture2"
+        android:text="Test"
+        android:onClick="getMilk"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1">
-
-    </FrameLayout>
-
+        android:layout_height="50dp"
+        android:layout_margin="10dp"
+        android:layout_gravity="bottom"
+        />
 
     <RelativeLayout
         android:id="@+id/innerRelativeLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true" >
-        <Button
-            android:id="@+id/button_capture"
-            android:text="Capture"
-            android:onClick="capturePhoto"
-            android:layout_width="fill_parent"
-            android:layout_height="50dp"
-            android:layout_margin="10dp"
-            android:layout_gravity="bottom"
+        <TextView
+            android:id="@+id/textview"
+            android:text="Test"
+            android:textColor="#fff"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:padding="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_weight="0.4"
             />
+
+        <RelativeLayout
+            android:id="@+id/innerRelativeLayout1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true" >
+            <Button
+                android:id="@+id/button_capture"
+                android:text="Capture"
+                android:onClick="capturePhoto"
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:layout_margin="10dp"
+                android:layout_gravity="bottom"
+                />
+        </RelativeLayout>
     </RelativeLayout>
 </RelativeLayout>

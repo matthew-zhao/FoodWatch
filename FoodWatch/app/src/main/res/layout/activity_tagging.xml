@@ -19,16 +19,7 @@
         android:scaleType="centerCrop"
         android:contentDescription="@string/user_image"/>-->
 
-    <!--<TextView
-        android:id="@+id/text_view"
-        android:textColor="#fff"
-        android:textSize="16sp"
-        android:gravity="center"
-        android:padding="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_weight="0.4"
-        />-->
+
     <FrameLayout
         android:id="@+id/camera_preview"
         android:layout_width="fill_parent"

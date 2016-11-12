@@ -1,5 +1,6 @@
 package com.sharifian.shaheen.foodwatch;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
@@ -31,15 +32,15 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.microsoft.windowsazure.mobileservices.*;
+
 
 import org.w3c.dom.Text;
 
-public class TaggingActivity extends ActionBarActivity {
+public class TaggingActivity extends Activity {
     public static final String TAG = "TaggingActivity";
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
-    private Camera mCamera;
-    private CameraPreview mPreview;
     private PictureCallback mPicture = new PictureCallback() {
 //        @Override
         public void onPictureTaken(byte[] data, Camera camera) {
@@ -104,15 +105,15 @@ public class TaggingActivity extends ActionBarActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        releaseCamera();              // release the camera immediately on pause event
+        //releaseCamera();              // release the camera immediately on pause event
     }
-
+/*
     private void releaseCamera(){
         if (mCamera != null){
             mCamera.release();        // release the camera for other applications
             mCamera = null;
         }
-    }
+    }*/
 
     /** A safe way to get an instance of the Camera object. */
     public static Camera getCameraInstance(){

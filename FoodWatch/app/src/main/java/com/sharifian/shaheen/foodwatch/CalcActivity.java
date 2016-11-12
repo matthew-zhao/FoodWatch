@@ -1,16 +1,15 @@
 package com.sharifian.shaheen.foodwatch;
 
-import android.app.AlertDialog;
+import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.util.Log;
-import android.view.Window;
+import android.widget.TextView;
 
 
 import com.clarifai.api.ClarifaiClient;
@@ -18,34 +17,43 @@ import com.clarifai.api.RecognitionRequest;
 import com.clarifai.api.RecognitionResult;
 import com.clarifai.api.Tag;
 import com.clarifai.api.exception.ClarifaiException;
-import com.couchbase.lite.CouchbaseLiteException;
-import com.couchbase.lite.Database;
-import com.couchbase.lite.Document;
-import com.couchbase.lite.Emitter;
-import com.couchbase.lite.Manager;
-import com.couchbase.lite.Mapper;
-import com.couchbase.lite.Query;
-import com.couchbase.lite.QueryEnumerator;
-import com.couchbase.lite.QueryRow;
-import com.couchbase.lite.View;
-import com.couchbase.lite.android.AndroidContext;
+import com.google.common.util.concurrent.AbstractFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
+import com.microsoft.windowsazure.mobileservices.*;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
+import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncContext;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.ColumnDataType;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.SQLiteLocalStore;
+import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
 
 import java.io.File;
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
-public class CalcActivity extends AppCompatActivity {
+import static com.microsoft.windowsazure.mobileservices.table.query.QueryOperations.val;
+
+public class CalcActivity extends Activity {
+    private MobileServiceClient mClient;
+    private MobileServiceTable<TagToFood> mTagToFood;
+    private List<TagToFood> tagToFoodList;
+    private HashSet<String> foodSet;
     public static final String TAG = "CalcActivity";
-    public static final String DB_NAME = "food";
-    protected static Manager manager;
-    private Database database;
     //A ProgressDialog object
     private ProgressDialog progressDialog;
 
@@ -60,13 +68,24 @@ public class CalcActivity extends AppCompatActivity {
         setContentView(R.layout.activity_calc);
         Intent intent = getIntent();
         photo_path[0] = intent.getStringExtra("CurrentPhotoPath");
-        createDB(); //create database
-
-        /*
+        try {
+            mClient = new MobileServiceClient("https://foodweb.azure-mobile.net/", "KfCuCQzAIBJyEsZXdMGSUkEkxNFZPk98", this).withFilter(new ProgressFilter());
+            Log.d(TAG, "We have created mobile service client");
+            mTagToFood = mClient.getTable(TagToFood.class);
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "URL for azure broken");
+        }
+        //createDB(); //create database
+    /*
         String[] tags = {"dairy product", "dairy", "slice", "butter"};
-        populate("butter", tags);
+        populate("butter", tags);*/
+
+        String[] tag = {"dairy product"};
+        populate("butter", tag);
+/*
         String[] tags2 = {"cheese", "cheddar", "dairy", "milk"};
         populate("cheese", tags2);
+
         String[] tags3 = {"milk", "drink", "glass", "breakfast", "yogurt"};
         populate("milk", tags3);
         String[] tags4 = {"bread", "wheat", "loaf", "food", "flour", "slice", "bakery"};
@@ -75,6 +94,7 @@ public class CalcActivity extends AppCompatActivity {
         populate("pork", tags5);
         String[] tags6 = {"tenderloin", "beef", "sirloin", "fillet", "rare", "meat"};
         populate("steak", tags6);
+
         String[] tags7 = {"egg", "breakfast", "egg yolk", "nutrition", "cholesterol"};
         populate("egg", tags7);
         String[] tags8 = {"candy", "color", "motley", "confection", "sugar", "assortment"};
@@ -95,12 +115,23 @@ public class CalcActivity extends AppCompatActivity {
         populate("soup", tags15);
         String[] tags16 = {"water", "glass", "bottle", "drink", "liquid", "table"};
         populate("water", tags16);*/
+        try {
+            initLocalStore().get();
+        } catch (Exception e) {
+            Log.e(TAG,"Error caught: " + e);
+        }
+
+        //if (pic_to_tag == null) {
+        //    return null; // an error in clairifai occurred, do something?
+        //}
         //Initialize a LoadViewTask object and call the execute() method
         new LoadViewTask().execute(photo_path);
     }
     public void populate(String food, String[] arr) {
         for (String s : arr) {
+            Log.d(TAG, "Got to populate");
             update(s, food);
+            Log.d(TAG, "Got after update");
         }
     }
 
@@ -122,8 +153,7 @@ public class CalcActivity extends AppCompatActivity {
 
         try {
             for(File file : files) {
-                List<RecognitionResult> results =
-                        client.recognize(new RecognitionRequest(file));
+                List<RecognitionResult> results = client.recognize(new RecognitionRequest(file));
                 if (results.get(0).getStatusCode() != RecognitionResult.StatusCode.OK) {
                     Log.e(TAG, file.toString() + "'s statuscode is not ok in getTags().");
                     result.put(file, new ArrayList<Tag>());
@@ -162,7 +192,7 @@ public class CalcActivity extends AppCompatActivity {
     }
 
     //To use the AsyncTask, it must be subclassed
-    private class LoadViewTask extends AsyncTask<String, Integer, String[]>
+    private class LoadViewTask extends AsyncTask<String, Integer, HashMap<File, List<Tag>>>
     {
         //Before running code in separate thread
         @Override
@@ -190,54 +220,31 @@ public class CalcActivity extends AppCompatActivity {
 
         //The code to be executed in a background thread.
         @Override
-        protected String[] doInBackground(String... photo_path)
+        protected HashMap<File, List<Tag>> doInBackground(String... photo_path)
         {
             /* This is just a code that delays the thread execution 4 times,
              * during 850 milliseconds and updates the current progress. This
              * is where the code that is going to be executed on a background
              * thread must be placed.
              */
-            String[] results = new String[2];
+            HashMap<File, List<Tag>> pic_to_tag = null;
             try
             {
                 //Get the current thread's token
                 synchronized (this)
                 {
-                    //getting the photo
                     File[] file_arr = new File[1];
                     //get the uri from the intent which contains extra content from the camera
                     file_arr[0] = new File(photo_path[0]);
-                    HashMap<File, List<Tag>> pic_to_tag = getTags(file_arr);
-                    if (pic_to_tag == null) {
-                        return null; // an error in clairifai occurred, do something?
-                    }
-                    publishProgress(33);
-                    Map<File, String> bestFood = calculate(pic_to_tag); //use daniel's function to calculate the name
-                    String[] foods = new String[bestFood.keySet().size()];
-                    int i = 0;
-                    for (File k : bestFood.keySet()) {
-                        foods[i] = bestFood.get(k);
-                        i++;
-                    }
-                    publishProgress(66);
-                    NutritionSearch dummy = new NutritionSearch(foods[0]);
-                    //calories per 100 grams
-                    String energy_content = dummy.search(foods[0], 0); //just calculate the first for now
-                    if (energy_content == null) {
-                        return null; // an error in food search occured, do something?
-                    }
-                    publishProgress(100);
-                    results = new String[2];
-                    results[0] = foods[0];
-                    results[1] = energy_content;
-                    return results;
+                    pic_to_tag = getTags(file_arr);
+                    return pic_to_tag;
                 }
             }
             catch (Exception e)
             {
                 e.printStackTrace();
             }
-            return results;
+            return pic_to_tag;
         }
 
         //Update the progress
@@ -250,23 +257,34 @@ public class CalcActivity extends AppCompatActivity {
 
         //after executing the code in the thread
         @Override
-        protected void onPostExecute(String[] result)
+        protected void onPostExecute(HashMap<File, List<Tag>> pic_to_tag)
         {
             //close the progress dialog
             progressDialog.dismiss();
             //initialize the View
 
-            if (result[0] == null && result[1] == null) {
-                return;
+            Map<File, String> bestFood = calculate(pic_to_tag); //use daniel's function to calculate the name
+            String[] foods = new String[bestFood.keySet().size()];
+            int i = 0;
+            for (File k : bestFood.keySet()) {
+                foods[i] = bestFood.get(k);
+                i++;
             }
-
-            Intent intent = new Intent(getApplicationContext(), TaggingActivity.class);
+            NutritionSearch dummy = new NutritionSearch(foods[0]);
+            //calories per 100 grams
+            String energy_content = dummy.search(foods[0], 0); //just calculate the first for now
+            //if (energy_content == null) {
+            //    return null; // an error in food search occurred, do something?
+            //}
+            String[] result = new String[2];
+            result[0] = foods[0];
+            result[1] = energy_content;
+            Intent intent2 = new Intent(getApplicationContext(), TaggingActivity.class);
             // TODO: Uncomment when Shaheen finishes this
-            intent.putExtra("Photo", photo_path);
-            intent.putExtra("Food", result[0]);
-            intent.putExtra("Calories per 100 gram", result[1]);
-            startActivity(intent);
-            //setContentView(R.layout.main);
+            intent2.putExtra("Photo", photo_path);
+            intent2.putExtra("Food", result[0]);
+            intent2.putExtra("Calories per 100 gram", result[1]);
+            startActivity(intent2);
         }
     }
 
@@ -310,124 +328,305 @@ public class CalcActivity extends AppCompatActivity {
         return found;
     }
 
-    private void createDB() {
-        //Manager manager = null;
-        //Database database = null;
-        try {
-            manager = new Manager(new AndroidContext(this), Manager.DEFAULT_OPTIONS);
-            database = manager.getDatabase(DB_NAME);
-            View viewFoods = database.getView("foods");
-            viewFoods.setMap(new Mapper() {
-                @Override
-                public void map(Map<String, Object> document, Emitter emitter) {
-                    Object tag = document.get("tag");
-                    if (tag != null) {
-                        emitter.emit(tag.toString(), null);
-                    }
-                }
-            }, "1.1.0");
-        } catch (Exception e) {
-            Log.e(TAG, "Error getting database", e);
-            return;
-        }
-        //Follows CRUD: Create, Retrieve, Update, Delete (Add?)
-        // Create the document
-        
-    }
-
-    // We make Manager/Database references singletons
-    public Database getDatabaseInstance() throws CouchbaseLiteException {
-        if ((this.database == null) & (this.manager != null)) {
-            this.database = manager.getDatabase(DB_NAME);
-        }
-        return database;
-    }
-    public Manager getManagerInstance() throws IOException {
-        if (manager == null) {
-            manager = new Manager(new AndroidContext(this), Manager.DEFAULT_OPTIONS);
-        }
-        return manager;
-    }
-
     public void createTagFood(String tag, HashSet<String> food) {
-        // Create a new document and add date
-        Document document = database.createDocument();
-        //docId = document.getId();
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("tag", tag);
-        map.put("food", food);
-        //map.put(tag, food);
-        try {
-            // Save the properties to the document
-            document.putProperties(map);
-        } catch (CouchbaseLiteException e) {
-            Log.e(TAG, "Error putting", e);
-        }
-        //return docId;
+
+        final TagToFood newMapping = new TagToFood(tag, convertToString(food));
+        //AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
+            //@Override
+            //protected Void doInBackground(Void... params) {
+                try {
+                    mTagToFood.insert(newMapping).get();
+                } catch (final Exception e) {
+                    Log.e(TAG, "Exceptions");
+                }
+                //return null;
+            //}
+        //};
+
+        //runAsyncTask(task);
     }
 
     //ths should actually return a hashset
-    public Object getFood(String tag) {
-        // Finding all documents, then looking ones with that specific tag
-        //Query query = database.createAllDocumentsQuery();
-        Query query = database.getView("foods").createQuery();
-        List<Object> keys = new ArrayList<Object>();
-        keys.add(tag);
-        query.setKeys(keys);
-        QueryEnumerator result = null;
+    public Object getFood(final String tag) {
+        /*final MobileServiceList<TagToFood> result;
         try {
-            result = query.run();
-        } catch (CouchbaseLiteException e) {
-            Log.e(TAG, "Error putting", e);
+            // this should only return 1 result, for loop below should only run once
+            ListenableFuture<MobileServiceList<TagToFood>> process = mTagToFood.where().field("tag").eq(tag).execute();
+            result = process.get(3, TimeUnit.SECONDS);
+            TagToFood mapping = null;
+            for (TagToFood map : result) {
+                map = mapping;
+            }
+            if (mapping != null) {
+                return convertToHashSet(mapping.foods);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Some exception caught:" + e);
         }
-        QueryRow row = null;
-        for (Iterator<QueryRow> it = result; it.hasNext(); ) {
-            row = it.next();
-        }
-        if (row == null) {
-            return null;
-        }
-        Document retrievedDocument = row.getDocument();
-        Map<String, Object> tagToFood = new HashMap<String, Object>();
-        tagToFood.putAll(retrievedDocument.getProperties());
-        return tagToFood.get("food");
+        return null;*/
+        //AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
+            //@Override
+            //protected Void doInBackground(Void... params) {
+                HashSet<String> foodSet = null;
+                try {
+                    List<TagToFood> results = refreshItemsFromMobileServiceTable(tag);
+                    TagToFood mapping = null;
+                    for (TagToFood map : results) {
+                        mapping = map;
+                    }
+                    if (mapping != null) {
+                        foodSet = convertToHashSet(mapping.getFoods());
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Some exception caught:" + e);
+                }
+                //return foodSet;
+                //return null;
+            //}
+            /*
+            @Override
+            protected void onPostExecute(String[] result)
+            {
+                //close the progress dialog
+                progressDialog.dismiss();
+                //initialize the View
+
+                if (result[0] == null && result[1] == null) {
+                    return;
+                }
+
+                Intent intent = new Intent(getApplicationContext(), TaggingActivity.class);
+                // TODO: Uncomment when Shaheen finishes this
+                intent.putExtra("Photo", photo_path);
+                intent.putExtra("Food", result[0]);
+                intent.putExtra("Calories per 100 gram", result[1]);
+                startActivity(intent);
+                //setContentView(R.layout.main);
+            }*/
+        //};
+        //runAsyncTask(task);
+        return foodSet;
     }
 
-    public void update(String tag, String food) {
-        Query query = database.getView("foods").createQuery();
-        //List<Object> keys = new ArrayList<Object>();
-        //keys.add(tag);
-        //query.setKeys(keys);
-        query.setStartKey(tag);
-        query.setEndKey(tag);
-        QueryEnumerator result = null;
+    public void update(final String tag, final String food) {
+        //AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
+            //@Override
+            //protected Void doInBackground(Void... params) {
+                try {
+                    List<TagToFood> results = refreshItemsFromMobileServiceTable(tag);
+
+                    TagToFood mapping = null;
+                    if (results != null) {
+                        for (TagToFood map : results) {
+                            mapping = map;
+                        }
+                        //adding food to the hashset of foods associated to that tag
+                        HashSet<String> setFoods = convertToHashSet(mapping.getFoods());
+                        setFoods.add(food);
+                        String newFoodString = convertToString(setFoods);
+                        mTagToFood.update(mapping);
+                    } else {
+                        //no tag so create one
+                        HashSet<String> newFoodSet = new HashSet<String>();
+                        newFoodSet.add(food);
+                        TagToFood newMapping = new TagToFood(tag, convertToString(newFoodSet));
+                        try {
+                            mTagToFood.insert(newMapping);
+                        } catch (Exception f) {
+                            Log.e(TAG, "Exceptions");
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "EXCEPTION");
+                }
+                //return null;
+            //}
+        //};
+        //runAsyncTask(task);
+        /*
+        final MobileServiceList<TagToFood> result;
         try {
-            result = query.run();
-        } catch (CouchbaseLiteException e) {
-            Log.e(TAG, "Conflict or something happened", e);
-        }
-        QueryRow row = null;
-        for (Iterator<QueryRow> it = result; it.hasNext(); ) {
-            row = it.next();
-        }
-        Log.d(TAG, row.toString());
-        //no tag like this was ever created, then we need to create a new document
-        if (row == null) {
-            HashSet<String> newFoods = new HashSet<String>();
-            newFoods.add(food);
-            createTagFood(tag, newFoods);
-        } else {
-            Document document = row.getDocument();
+            result = mTagToFood.where().field("tag").eq(tag).execute().get();
+            //result = process.get();
+            TagToFood mapping = null;
+            for (TagToFood map : result) {
+                mapping = map;
+            }
+            if (mapping != null) {
+                //adding food to the hashset of foods associated to that tag
+                HashSet<String> setFoods = convertToHashSet(mapping.foods);
+                setFoods.add(food);
+                String newFoodString = convertToString(setFoods);
+                mTagToFood.update(mapping).get(1, TimeUnit.SECONDS);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Some exception caught: " + e);
+            //no tag so create one
+            TagToFood newMapping = new TagToFood();
+            newMapping.tag = tag;
+            HashSet<String> newFoodSet = new HashSet<String>();
+            newFoodSet.add(food);
+            newMapping.foods = convertToString(newFoodSet);
             try {
-                Map<String, Object> tagToFood = new HashMap<String, Object>(document.getProperties());
-                HashSet<String> foods = (HashSet<String>) tagToFood.get("food");
-                foods.add(food);
-                tagToFood.put("food", food);
-                document.putProperties(tagToFood);
-            } catch (CouchbaseLiteException e) {
-                Log.e(TAG, "Conflict or something happened", e);
+                mTagToFood.insert(newMapping).get(1, TimeUnit.SECONDS);
+            } catch (Exception f) {
+                Log.e(TAG, "Exceptions");
+            }
+        }*/
+    }
+
+    private List<TagToFood> refreshItemsFromMobileServiceTable(String tag) throws ExecutionException, InterruptedException {
+        final ArrayList<List<TagToFood>> tagToFoodListArray = new ArrayList<List<TagToFood>>();
+        try {
+            MobileServiceClient mClient = new MobileServiceClient("https://foodweb.azure-mobile.net/", "KfCuCQzAIBJyEsZXdMGSUkEkxNFZPk98", this).withFilter(new ProgressFilter());
+            MobileServiceTable<TagToFood> mTagToFood = mClient.getTable(TagToFood.class);
+
+            mTagToFood.where().field("tag").eq(tag).execute(new TableQueryCallback<TagToFood>() {
+                @Override
+                public void onCompleted(List<TagToFood> result, int count, Exception exception, ServiceFilterResponse response) {
+                    if (exception == null) {
+                        //Log.d(TAG, result.toString());
+                        //tagToFoodList = result;
+                        tagToFoodListArray.add(result);
+                        TextView textView = (TextView) findViewById(R.id.textview);
+                        for (TagToFood map : tagToFoodList) {
+                            textView.setText("Ready");
+                        }
+                    } else {
+                        Log.e(TAG, "Timeout error");
+                        TextView textView = (TextView) findViewById(R.id.textview);
+                        textView.setText("Ready");
+                    }
+                }
+            });
+            //return mTagToFood.where().field("tag").eq(tag).execute().get();
+
+            /*for (TagToFood map : tagToFoodList) {
+                Log.d(TAG, map.getTag());
+                Log.d(TAG, map.getFoods());
+            }*/
+        } catch (Exception e) {
+            Log.e(TAG, "Error");
+        }
+        //return tagToFoodListArray.get(0);
+        TextView textView = (TextView) findViewById(R.id.textview);
+        while (!textView.getText().equals("Ready")) {
+            Thread.sleep(1000);
+        }
+        textView.setText("Dummy");
+        return tagToFoodListArray.get(0);
+        //mClient.getTable(TagToFood.class).where().field("tag").eq(tag).execute
+    }
+
+    public String convertToString(HashSet<String> foods) {
+        String result = ""; //this MUST be consistent
+        for (String food : foods) {
+            result = result.concat(food);
+            result = result.concat(";");
+        }
+        if (!result.equals("")) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result;
+    }
+
+    public HashSet<String> convertToHashSet(String foods) {
+        HashSet<String> result = new HashSet<String>();
+        if (foods != null && !foods.equals("")) {
+            String[] foodStrings = foods.split(";");
+            for (String food : foodStrings) {
+                result.add(food);
             }
         }
+        return result;
     }
 
+    private class ProgressFilter implements ServiceFilter {
+
+        @Override
+        public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+            final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+            ListenableFuture<ServiceFilterResponse> future = nextServiceFilterCallback.onNext(request);
+
+            Futures.addCallback(future, new FutureCallback<ServiceFilterResponse>() {
+                @Override
+                public void onFailure(Throwable e) {
+                    resultFuture.setException(e);
+                }
+
+                @Override
+                public void onSuccess(ServiceFilterResponse response) {
+                    resultFuture.set(response);
+                }
+            });
+
+            return resultFuture;
+        }
+    }
+
+    /**
+     * Initialize local storage
+     * @return
+     * @throws MobileServiceLocalStoreException
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    private AsyncTask<Void, Void, Void> initLocalStore() throws MobileServiceLocalStoreException, ExecutionException, InterruptedException {
+
+        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+
+                    MobileServiceSyncContext syncContext = mClient.getSyncContext();
+
+                    if (syncContext.isInitialized())
+                        return null;
+
+                    SQLiteLocalStore localStore = new SQLiteLocalStore(mClient.getContext(), "OfflineStore", null, 1);
+
+                    Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+                    tableDefinition.put("id", ColumnDataType.String);
+                    tableDefinition.put("text", ColumnDataType.String);
+                    tableDefinition.put("complete", ColumnDataType.Boolean);
+
+                    localStore.defineTable("ToDoItem", tableDefinition);
+
+                    SimpleSyncHandler handler = new SimpleSyncHandler();
+
+                    syncContext.initialize(localStore, handler).get();
+
+                } catch (final Exception e) {
+                    Log.e(TAG, "Error");
+                }
+
+                return null;
+            }
+        };
+
+        return runAsyncTask(task);
+    }
+
+    /**
+     * Run an ASync task on the corresponding executor
+     * @param task
+     * @return
+     */
+    private AsyncTask<Void, Void, Void> runAsyncTask(AsyncTask<Void, Void, Void> task) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            return task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            return task.execute();
+        }
+    }
+
+    private AsyncTask<Void, Void, HashSet<String>> runAsyncTask2(AsyncTask<Void, Void, HashSet<String>> task) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            return task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            return task.execute();
+        }
+    }
 }

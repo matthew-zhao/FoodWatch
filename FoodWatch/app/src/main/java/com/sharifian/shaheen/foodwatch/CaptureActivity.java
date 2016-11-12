@@ -1,38 +1,40 @@
 package com.sharifian.shaheen.foodwatch;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Application;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.v7.app.ActionBarActivity;
+import android.provider.MediaStore;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
+import android.widget.TextView;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
-public class CaptureActivity extends ActionBarActivity {
+public class CaptureActivity extends Activity {
     private static final String TAG = "TAGGING  ACTIVITY";
-
-    // Storage for camera image URI components
-    private final static String CAPTURED_PHOTO_PATH_KEY = "mCurrentPhotoPath";
-    private final static String CAPTURED_PHOTO_URI_KEY = "mCapturedImageURI";
+    private static final int CONTENT_REQUEST = 1;
 
     // Required for camera operations in order to save the image file on resume.
     private String mCurrentPhotoPath = null;
@@ -41,10 +43,10 @@ public class CaptureActivity extends ActionBarActivity {
 
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
-    private Camera mCamera;
-    private CameraPreview mPreview;
-    // Reference to the containing view.
-    private View mCameraView;
+    private List<TagToFood> tagToFoodList;
+    private List<ToDoItem> toDoItemList;
+
+    /*
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
         //        @Override
         public void onPictureTaken(byte[] data, Camera camera) {
@@ -66,57 +68,85 @@ public class CaptureActivity extends ActionBarActivity {
             }
             mCurrentPhotoPath = pictureFile.getPath();
         }
-    };
-
-    /**
-     * Recommended "safe" way to open the camera.
-     * @param view
-     * @return
-     */
-    private boolean safeCameraOpenInView(View view) {
-        boolean qOpened = false;
-        releaseCameraAndPreview();
-        mCamera = getCameraInstance();
-        mCameraView = view;
-        qOpened = (mCamera != null);
-
-        if(qOpened == true){
-            mPreview = new CameraPreview(getBaseContext(), mCamera, view);
-            FrameLayout preview = (FrameLayout) view.findViewById(R.id.camera_preview);
-            preview.addView(mPreview);
-            mPreview.startCameraPreview();
-        }
-        return qOpened;
-    }
+    };*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_capture2);
-        //View view = inflater.inflate(R.layout.content_capture2, container, false);
-        // Create an instance of Camera
-        mCamera = getCameraInstance();
-
-        // Create our Preview view and set it as the content of our activity.
-        mPreview = new CameraPreview(this, mCamera);
-        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
-
-        Button captureButton = (Button) findViewById(R.id.button_capture);
-//        captureButton.setOnClickListener(
-//                new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        // get an image from the camera
-//                        mCamera.takePicture(null, null, mPicture);
-//                    }
-//                }
-//        );
     }
     public void capturePhoto(View v) {
-        mCamera.takePicture(null, null, mPicture);
-        displayConfirmation();
+        Intent i=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "MyCameraApp");
 
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String mediaFile;
+        //mediaFile = dir.getPath() + File.separator + "IMG_"+ timeStamp + ".jpg";
+        mediaFile = mediaStorageDir.getPath() + File.separator + "IMG_"+ timeStamp + ".jpg";
+        setCurrentPhotoPath(mediaFile);
+
+        File output=new File(mediaFile);
+
+        try {
+            if(output.exists() == false) {
+                output.getParentFile().mkdirs();
+                output.createNewFile();
+            }
+
+        } catch (IOException e) {
+            Log.e(TAG, "Could not create file.", e);
+        }
+        Log.i(TAG, mediaFile);
+
+        i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(output));
+
+        startActivityForResult(i, CONTENT_REQUEST);
+    }
+
+    public void getMilk(View v) {
+        //for (int i = 0; i < 2; i++) {
+            try {
+                MobileServiceClient mClient = new MobileServiceClient("https://foodweb.azure-mobile.net/", "KfCuCQzAIBJyEsZXdMGSUkEkxNFZPk98", this).withFilter(new ProgressFilter());
+                Log.d(TAG, "We have created mobile service client");
+                MobileServiceTable<TagToFood> mTagToFood = mClient.getTable(TagToFood.class);
+                try {
+
+                    mTagToFood.where().field("tag").eq("dairy").execute(new TableQueryCallback<TagToFood>() {
+                        @Override
+                        public void onCompleted(List<TagToFood> result, int count, Exception exception, ServiceFilterResponse response) {
+                            if (exception == null) {
+                                tagToFoodList = result;
+                                TextView textView = (TextView) findViewById(R.id.textview);
+                                for (TagToFood map : tagToFoodList) {
+                                    textView.setText(map.getTag() + ":" + map.getFoods());
+                                }
+                            } else {
+                                Log.e(TAG, "Timeout error");
+                            }
+                        }
+                    });
+                    //tagToFoodList = mTagToFood.where().field("tag").eq("dairy").execute().get();
+                    //toDoItemList = mTagToFood.where().field("complete").eq(false).execute().get();
+
+                    /*ToDoItem mapping = null;
+                    for (ToDoItem map : toDoItemList) {
+                        Log.d(TAG, map.getText());
+                    }*/
+
+                } catch (Exception e) {
+                    Log.e(TAG, "Error: " + e);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error: " + e);
+            }
+        //}
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        displayConfirmation();
     }
 
     public void displayConfirmation() {
@@ -143,9 +173,9 @@ public class CaptureActivity extends ActionBarActivity {
         //    }
         //});
         alertDialog.show();
-        AlertDialog alert = alertDialog.create();
-        alertDialog.setTitle("Are you sure?");
-        alert.show();
+        //AlertDialog alert = alertDialog.create();
+        //alertDialog.setTitle("Are you sure?");
+        //alert.show();
     }
 
     @Override
@@ -173,32 +203,7 @@ public class CaptureActivity extends ActionBarActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        releaseCameraAndPreview();              // release the camera immediately on pause event
-    }
-
-    private void releaseCameraAndPreview() {
-        if (mCamera != null){
-            mCamera.setPreviewCallback(null);
-            mPreview.getHolder().removeCallback(mPreview);
-            mCamera.release();        // release the camera for other applications
-            mCamera = null;
-        }
-        if(mPreview != null){
-            mPreview.destroyDrawingCache();
-            mPreview.mCamera = null;
-        }
-    }
-
-    /** A safe way to get an instance of the Camera object. */
-    public static Camera getCameraInstance(){
-        Camera c = null;
-        try {
-            c = Camera.open(); // attempt to get a Camera instance
-        }
-        catch (Exception e){
-            // Camera is not available (in use or does not exist)
-        }
-        return c; // returns null if camera is unavailable
+        //releaseCamera();              // release the camera immediately on pause event
     }
 
     /** Create a file Uri for saving an image or video */
@@ -257,5 +262,30 @@ public class CaptureActivity extends ActionBarActivity {
     }
     public File getCapturedFile() {
         return mImageFile;
+    }
+
+    private class ProgressFilter implements ServiceFilter {
+
+        @Override
+        public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+            final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+            ListenableFuture<ServiceFilterResponse> future = nextServiceFilterCallback.onNext(request);
+
+            Futures.addCallback(future, new FutureCallback<ServiceFilterResponse>() {
+                @Override
+                public void onFailure(Throwable e) {
+                    resultFuture.setException(e);
+                }
+
+                @Override
+                public void onSuccess(ServiceFilterResponse response) {
+                    resultFuture.set(response);
+                }
+            });
+
+            return resultFuture;
+        }
     }
 }

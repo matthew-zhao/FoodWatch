@@ -36,5 +36,6 @@ dependencies {
     compile 'com.android.support:design:22.2.1'
     compile 'com.clarifai:clarifai-api-java:1.1.0'
     compile 'com.google.code.gson:gson:2.4'
+    compile 'com.microsoft.azure:azure-mobile-services-android-sdk:2.0.3'
     //compile files('libs/gson-2.4.jar')
 }
