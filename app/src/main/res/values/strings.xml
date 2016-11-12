@@ -1,0 +1,14 @@
+<resources>
+    <string name="clarifai_id">0ed49F1wo8JsuEiYj-nQArG8mOkggTJpmPBGtIk8</string>
+    <string name="clarifai_secret">vTOmqox7ak6du2GRereN8mZuvb3fSsz0K3lmyIyr</string>
+
+    <string name="app_name">FoodWatch</string>
+
+    <string name="error_external_storage_permission_not_granted">You must accept this permission so we can upload your images!</string>
+
+    <string name="error_while_contacting_api">Error while contacting Clarifai API</string>
+    <string name="no_results_from_api">API did not return any results</string>
+
+    <string name="upload_image_hint">Click the button in the bottom-right corner to upload an image!</string>
+
+</resources>
