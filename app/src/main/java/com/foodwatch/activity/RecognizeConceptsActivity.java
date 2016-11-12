@@ -74,6 +74,12 @@ public final class RecognizeConceptsActivity extends BaseActivity {
     startActivityForResult(new Intent(Intent.ACTION_PICK).setType("image/*"), PICK_IMAGE);
   }
 
+  @OnClick (R.id.fab_camera)
+  void capture_activity() {
+    Intent intent = new Intent(getBaseContext(), CaptureActivity.class);
+    startActivity(intent);
+  }
+
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (resultCode != RESULT_OK) {
