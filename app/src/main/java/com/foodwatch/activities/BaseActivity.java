@@ -1,4 +1,4 @@
-package com.foodwatch.activity;
+package com.foodwatch.activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;

@@ -1,4 +1,4 @@
-package com.foodwatch.activity;
+package com.foodwatch.activities;
 
 import android.content.Intent;
 import android.graphics.BitmapFactory;
@@ -41,7 +41,6 @@ import clarifai2.dto.model.ConceptModel;
 import clarifai2.dto.model.output.ClarifaiOutput;
 import clarifai2.dto.prediction.Concept;
 
-import static android.R.attr.bitmap;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -64,7 +63,6 @@ public final class RecognizeConceptsActivity extends BaseActivity {
   @BindView(R.id.fab_camera) View fab_camera;
 
   File file;
-
 
     @NonNull
   private final RecognizeConceptsAdapter adapter = new RecognizeConceptsAdapter();

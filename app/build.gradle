@@ -22,7 +22,7 @@ android {
   buildToolsVersion "24.0.2"
   defaultConfig {
     applicationId "com.clarifai.android.starter.api.v2"
-    minSdkVersion 15
+    minSdkVersion 18
     targetSdkVersion 24
     versionCode 2
     versionName "1.1"
