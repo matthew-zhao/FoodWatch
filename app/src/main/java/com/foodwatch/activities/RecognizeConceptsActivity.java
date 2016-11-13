@@ -21,13 +21,24 @@ import android.widget.ViewSwitcher;
 
 import com.foodwatch.App;
 import com.foodwatch.ClarifaiUtil;
+import com.foodwatch.FetchAPI;
+import com.foodwatch.FoodItem;
 import com.foodwatch.adapter.RecognizeConceptsAdapter;
 import com.foodwatch.android.starter.api.v2.R;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -61,6 +72,8 @@ public final class RecognizeConceptsActivity extends BaseActivity {
   // the FAB that the user clicks to select an image
   @BindView(R.id.fab_upload) View fab_upload;
   @BindView(R.id.fab_camera) View fab_camera;
+
+  String[] results;
 
   File file;
 
@@ -176,6 +189,13 @@ public final class RecognizeConceptsActivity extends BaseActivity {
         }
         adapter.setData(predictions.get(0).data());
         imageView.setImageBitmap(BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length));
+        Log.d("data", predictions.get(0).data().toString());
+
+        FetchAPI api = new FetchAPI(predictions.get(0).data(), RecognizeConceptsActivity.this);
+        api.execute();
+        //Intent resultIntent = new Intent(getBaseContext(), ResultActivity.class);
+        //resultIntent.putExtra("")
+        //startActivity(resultIntent);
       }
 
       private void showErrorSnackbar(@StringRes int errorString) {
@@ -186,6 +206,7 @@ public final class RecognizeConceptsActivity extends BaseActivity {
         ).show();
       }
     }.execute();
+    //Log.d("stuf", results[0]);
   }
 
 
@@ -203,4 +224,10 @@ public final class RecognizeConceptsActivity extends BaseActivity {
     });
   }
 
+  public void display_UI(String[] results) {
+    adapter.setData(results);
+
+  }
+
 }
+
