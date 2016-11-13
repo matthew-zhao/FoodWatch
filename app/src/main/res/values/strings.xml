@@ -12,5 +12,6 @@
     <string name="upload_image_hint">Click the button in the bottom-right corner to upload an image!</string>
     <string name="title_activity_capture">CaptureActivity</string>
     <string name="title_activity_tagging">TaggingActivity</string>
+    <string name="title_activity_result">ResultActivity</string>
 
 </resources>

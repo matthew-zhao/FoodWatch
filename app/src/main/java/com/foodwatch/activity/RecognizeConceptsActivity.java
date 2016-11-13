@@ -21,13 +21,24 @@ import android.widget.ViewSwitcher;
 
 import com.foodwatch.App;
 import com.foodwatch.ClarifaiUtil;
+import com.foodwatch.FetchAPI;
+import com.foodwatch.FoodItem;
 import com.foodwatch.adapter.RecognizeConceptsAdapter;
 import com.foodwatch.android.starter.api.v2.R;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -41,7 +52,6 @@ import clarifai2.dto.model.ConceptModel;
 import clarifai2.dto.model.output.ClarifaiOutput;
 import clarifai2.dto.prediction.Concept;
 
-import static android.R.attr.bitmap;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -63,8 +73,9 @@ public final class RecognizeConceptsActivity extends BaseActivity {
   @BindView(R.id.fab_upload) View fab_upload;
   @BindView(R.id.fab_camera) View fab_camera;
 
-  File file;
+  String[] results;
 
+  File file;
 
     @NonNull
   private final RecognizeConceptsAdapter adapter = new RecognizeConceptsAdapter();
@@ -176,8 +187,13 @@ public final class RecognizeConceptsActivity extends BaseActivity {
           showErrorSnackbar(R.string.no_results_from_api);
           return;
         }
-        adapter.setData(predictions.get(0).data());
+        //adapter.setData(predictions.get(0).data());
         imageView.setImageBitmap(BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length));
+        Log.d("data", predictions.get(0).data().toString());
+
+        FetchAPI api = new FetchAPI(predictions.get(0).data());
+        api.execute();
+        adapter.setData(results);
       }
 
       private void showErrorSnackbar(@StringRes int errorString) {
@@ -188,6 +204,7 @@ public final class RecognizeConceptsActivity extends BaseActivity {
         ).show();
       }
     }.execute();
+    Log.d("stuf", results[0]);
   }
 
 
@@ -206,3 +223,4 @@ public final class RecognizeConceptsActivity extends BaseActivity {
   }
 
 }
+
