@@ -18,6 +18,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.data;
+
 public final class ClarifaiUtil {
   private ClarifaiUtil() {
     throw new UnsupportedOperationException("No instances");
@@ -51,6 +53,17 @@ public final class ClarifaiUtil {
         bitmap.recycle();
       }
     }
+  }
+
+  @Nullable
+  public static byte[] retrieveSelectedImage(@NonNull Context context, @NonNull Bitmap pic) {
+    //InputStream inStream = null;
+    Bitmap bitmap = null;
+    //inStream = context.getContentResolver().openInputStream(data.getData());
+    //bitmap = BitmapFactory.decodeStream(inStream);
+    final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+    pic.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
+    return outStream.toByteArray();
   }
 
   @NonNull

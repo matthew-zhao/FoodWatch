@@ -25,6 +25,8 @@ import com.foodwatch.adapter.RecognizeConceptsAdapter;
 import com.foodwatch.android.starter.api.v2.R;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -39,6 +41,7 @@ import clarifai2.dto.model.ConceptModel;
 import clarifai2.dto.model.output.ClarifaiOutput;
 import clarifai2.dto.prediction.Concept;
 
+import static android.R.attr.bitmap;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -60,7 +63,7 @@ public final class RecognizeConceptsActivity extends BaseActivity {
   @BindView(R.id.fab_upload) View fab_upload;
   @BindView(R.id.fab_camera) View fab_camera;
 
-  Bitmap bitmap;
+  File file;
 
 
     @NonNull
@@ -87,8 +90,6 @@ public final class RecognizeConceptsActivity extends BaseActivity {
 
   @OnClick(R.id.fab_camera)
   void capture_activity() {
-    //Intent intent = new Intent(getBaseContext(), CaptureActivity.class);
-    //startActivity(intent);
     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
     File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
@@ -100,7 +101,7 @@ public final class RecognizeConceptsActivity extends BaseActivity {
         return;
       }
     }
-    File file = new File(mediaStorageDir.getPath() + File.separator +
+    file = new File(mediaStorageDir.getPath() + File.separator +
             "IMG_"+ timeStamp + ".jpg");
     Uri photoPath = Uri.fromFile(file);
     intent.putExtra(MediaStore.EXTRA_OUTPUT, photoPath);
@@ -120,15 +121,27 @@ public final class RecognizeConceptsActivity extends BaseActivity {
         }
         break;
       case TAKE_PICTURE:
-        if (data != null) {
-          //Bundle extras = data.getExtras();
-          //bitmap = (Bitmap) extras.get("data");
-          final byte[] imageBytes2 = ClarifaiUtil.retrieveSelectedImage(this, data);
-          if (imageBytes2 != null) {
-            onImagePicked(imageBytes2);
-          }
-          break;
+        //Bundle extras = data.getExtras();
+        //Bitmap bitmap = (Bitmap) extras.get("data");
+        Bitmap bitmap_pic = null;
+        Uri uri = Uri.fromFile(file);
+        try {
+          bitmap_pic = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+        } catch (FileNotFoundException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
         }
+
+        //Bundle extras = data.getExtras();
+
+        final byte[] imageBytes2 = ClarifaiUtil.retrieveSelectedImage(this, bitmap_pic);
+        if (imageBytes2 != null) {
+          onImagePicked(imageBytes2);
+        }
+        break;
     }
   }
 
