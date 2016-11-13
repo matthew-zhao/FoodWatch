@@ -2,14 +2,19 @@ package com.foodwatch.activity;
 
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ViewSwitcher;
@@ -19,7 +24,10 @@ import com.foodwatch.ClarifaiUtil;
 import com.foodwatch.adapter.RecognizeConceptsAdapter;
 import com.foodwatch.android.starter.api.v2.R;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -37,6 +45,7 @@ import static android.view.View.VISIBLE;
 public final class RecognizeConceptsActivity extends BaseActivity {
 
   public static final int PICK_IMAGE = 100;
+  public static final int TAKE_PICTURE = 101;
 
   // the list of results that were returned from the API
   @BindView(R.id.resultsList) RecyclerView resultsList;
@@ -50,6 +59,8 @@ public final class RecognizeConceptsActivity extends BaseActivity {
   // the FAB that the user clicks to select an image
   @BindView(R.id.fab_upload) View fab_upload;
   @BindView(R.id.fab_camera) View fab_camera;
+
+  Bitmap bitmap;
 
 
     @NonNull
@@ -74,10 +85,26 @@ public final class RecognizeConceptsActivity extends BaseActivity {
     startActivityForResult(new Intent(Intent.ACTION_PICK).setType("image/*"), PICK_IMAGE);
   }
 
-  @OnClick (R.id.fab_camera)
+  @OnClick(R.id.fab_camera)
   void capture_activity() {
-    Intent intent = new Intent(getBaseContext(), CaptureActivity.class);
-    startActivity(intent);
+    //Intent intent = new Intent(getBaseContext(), CaptureActivity.class);
+    //startActivity(intent);
+    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+    File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES), "MyCameraApp");
+    // Create the storage directory if it does not exist
+    if (! mediaStorageDir.exists()){
+      if (! mediaStorageDir.mkdirs()){
+        Log.d("MyCameraApp", "failed to create directory");
+        return;
+      }
+    }
+    File file = new File(mediaStorageDir.getPath() + File.separator +
+            "IMG_"+ timeStamp + ".jpg");
+    Uri photoPath = Uri.fromFile(file);
+    intent.putExtra(MediaStore.EXTRA_OUTPUT, photoPath);
+    startActivityForResult(intent, TAKE_PICTURE);
   }
 
   @Override
@@ -92,6 +119,16 @@ public final class RecognizeConceptsActivity extends BaseActivity {
           onImagePicked(imageBytes);
         }
         break;
+      case TAKE_PICTURE:
+        if (data != null) {
+          //Bundle extras = data.getExtras();
+          //bitmap = (Bitmap) extras.get("data");
+          final byte[] imageBytes2 = ClarifaiUtil.retrieveSelectedImage(this, data);
+          if (imageBytes2 != null) {
+            onImagePicked(imageBytes2);
+          }
+          break;
+        }
     }
   }
 

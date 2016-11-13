@@ -21,25 +21,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
-import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
-
+import com.foodwatch.TagToFood;
+import com.foodwatch.ToDoItem;
+import com.foodwatch.android.starter.api.v2.R;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-
-import com.clarifai.android.starter.api.v2.R;
 
 public class CaptureActivity extends AppCompatActivity {
 
@@ -115,7 +104,7 @@ public class CaptureActivity extends AppCompatActivity {
         alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // Action for 'Yes' Button
-                Intent intent = new Intent(getBaseContext(), CalcActivity.class);
+                Intent intent = new Intent(getBaseContext(), CaptureActivity.class);
                 intent.putExtra("CurrentPhotoPath", mCurrentPhotoPath);
                 //intent.putExtra("ImageFile", mImageFile);
 
@@ -136,28 +125,6 @@ public class CaptureActivity extends AppCompatActivity {
         //AlertDialog alert = alertDialog.create();
         //alertDialog.setTitle("Are you sure?");
         //alert.show();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_tagging, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     /** Create a file Uri for saving an image or video */
@@ -217,30 +184,4 @@ public class CaptureActivity extends AppCompatActivity {
     public File getCapturedFile() {
         return mImageFile;
     }
-
-    private class ProgressFilter implements ServiceFilter {
-
-        @Override
-        public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
-
-            final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
-
-            ListenableFuture<ServiceFilterResponse> future = nextServiceFilterCallback.onNext(request);
-
-            Futures.addCallback(future, new FutureCallback<ServiceFilterResponse>() {
-                @Override
-                public void onFailure(Throwable e) {
-                    resultFuture.setException(e);
-                }
-
-                @Override
-                public void onSuccess(ServiceFilterResponse response) {
-                    resultFuture.set(response);
-                }
-            });
-
-            return resultFuture;
-        }
-    }
-
 }

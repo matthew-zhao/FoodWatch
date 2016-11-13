@@ -24,6 +24,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.foodwatch.android.starter.api.v2.R;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -38,10 +40,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Map;
-
-import com.microsoft.windowsazure.mobileservices.*;
-
-import com.clarifai.android.starter.api.v2.R;
 
 import org.w3c.dom.Text;
 
