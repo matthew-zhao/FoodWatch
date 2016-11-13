@@ -187,13 +187,15 @@ public final class RecognizeConceptsActivity extends BaseActivity {
           showErrorSnackbar(R.string.no_results_from_api);
           return;
         }
-        //adapter.setData(predictions.get(0).data());
+        adapter.setData(predictions.get(0).data());
         imageView.setImageBitmap(BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length));
         Log.d("data", predictions.get(0).data().toString());
 
-        FetchAPI api = new FetchAPI(predictions.get(0).data());
+        FetchAPI api = new FetchAPI(predictions.get(0).data(), RecognizeConceptsActivity.this);
         api.execute();
-        adapter.setData(results);
+        //Intent resultIntent = new Intent(getBaseContext(), ResultActivity.class);
+        //resultIntent.putExtra("")
+        //startActivity(resultIntent);
       }
 
       private void showErrorSnackbar(@StringRes int errorString) {
@@ -204,7 +206,7 @@ public final class RecognizeConceptsActivity extends BaseActivity {
         ).show();
       }
     }.execute();
-    Log.d("stuf", results[0]);
+    //Log.d("stuf", results[0]);
   }
 
 
@@ -220,6 +222,11 @@ public final class RecognizeConceptsActivity extends BaseActivity {
         fab_upload.setEnabled(!busy);
       }
     });
+  }
+
+  public void display_UI(String[] results) {
+    adapter.setData(results);
+
   }
 
 }

@@ -12,7 +12,7 @@ import android.view.View;
 
 import com.foodwatch.adapter.RecognizeConceptsAdapter;
 
-import com.clarifai.android.starter.api.v2.R;
+//import com.clarifai.android.starter.api.v2.R;
 import com.foodwatch.android.starter.api.v2.R;
 
 import butterknife.BindView;
@@ -28,8 +28,8 @@ public class ResultActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        resultsList.setLayoutManager(new LinearLayoutManager(this));
-        resultsList.setAdapter(adapter);
+        //resultsList.setLayoutManager(new LinearLayoutManager(this));
+        //resultsList.setAdapter(adapter);
     }
 
     @Override

@@ -15,6 +15,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.foodwatch.activity.RecognizeConceptsActivity;
 import com.foodwatch.adapter.RecognizeConceptsAdapter;
 
 import clarifai2.dto.model.output.ClarifaiOutput;
@@ -23,10 +25,12 @@ import clarifai2.dto.prediction.Concept;
 public class FetchAPI extends AsyncTask<Void, Void, String[]> {
 
   private List<Concept> concept = new ArrayList<>();
+  private RecognizeConceptsActivity rcActivity;
 
-  public FetchAPI(List<Concept> concept) {
+  public FetchAPI(List<Concept> concept, RecognizeConceptsActivity rcActivity) {
     super();
     this.concept = concept;
+    this.rcActivity = rcActivity;
   }
   private final String LOG_TAG = FetchAPI.class.getSimpleName();
 
@@ -110,6 +114,7 @@ public class FetchAPI extends AsyncTask<Void, Void, String[]> {
     //RecognizeConceptsAdapter adapter = new RecognizeConceptsAdapter();
     //adapter.setData(items);
     //results = items;
+    rcActivity.display_UI(items);
   }
 
   private String[] getAPIData(String jsonStr) throws JSONException {
