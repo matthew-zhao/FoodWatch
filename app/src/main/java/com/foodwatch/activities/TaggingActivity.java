@@ -13,7 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
-import com.foodwatch.android.starter.api.v2.R;
+import com.foodwatch.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;

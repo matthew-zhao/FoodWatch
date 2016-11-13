@@ -4,8 +4,6 @@ import android.app.Application;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.foodwatch.android.starter.api.v2.R;
-
 import java.util.concurrent.TimeUnit;
 
 import clarifai2.api.ClarifaiBuilder;

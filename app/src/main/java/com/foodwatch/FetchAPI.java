@@ -132,7 +132,7 @@ public class FetchAPI extends AsyncTask<Void, Void, String[]> {
     listData.add(food.getString("vit_c"));
     //FoodItem foodItem = new FoodItem(name, info, ordinal, kind, content, phone, url);
 
-    //return listData.toArray(new String[listData.size()]);
+    Log.d("test", listData.toString());
     return listData.toArray(new String[listData.size()]);
   }
 }

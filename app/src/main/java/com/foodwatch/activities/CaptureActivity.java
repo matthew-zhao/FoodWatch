@@ -15,7 +15,7 @@ import android.util.Log;
 
 import com.foodwatch.TagToFood;
 import com.foodwatch.ToDoItem;
-import com.foodwatch.android.starter.api.v2.R;
+import com.foodwatch.R;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;

@@ -9,7 +9,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.foodwatch.android.starter.api.v2.R;
+import com.foodwatch.R;
 
 public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {

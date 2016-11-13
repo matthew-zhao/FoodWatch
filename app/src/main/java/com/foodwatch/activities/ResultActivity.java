@@ -9,7 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.foodwatch.adapter.RecognizeConceptsAdapter;
-import com.foodwatch.android.starter.api.v2.R;
+import com.foodwatch.R;
 
 public class ResultActivity extends AppCompatActivity {
 

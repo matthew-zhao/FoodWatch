@@ -23,7 +23,7 @@ import com.foodwatch.App;
 import com.foodwatch.ClarifaiUtil;
 import com.foodwatch.FetchAPI;
 import com.foodwatch.adapter.RecognizeConceptsAdapter;
-import com.foodwatch.android.starter.api.v2.R;
+import com.foodwatch.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;
