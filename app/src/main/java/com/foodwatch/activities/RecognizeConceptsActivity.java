@@ -1,13 +1,13 @@
 package com.foodwatch.activities;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -22,23 +22,13 @@ import android.widget.ViewSwitcher;
 import com.foodwatch.App;
 import com.foodwatch.ClarifaiUtil;
 import com.foodwatch.FetchAPI;
-import com.foodwatch.FoodItem;
 import com.foodwatch.adapter.RecognizeConceptsAdapter;
 import com.foodwatch.android.starter.api.v2.R;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -206,7 +196,6 @@ public final class RecognizeConceptsActivity extends BaseActivity {
         ).show();
       }
     }.execute();
-    //Log.d("stuf", results[0]);
   }
 
 

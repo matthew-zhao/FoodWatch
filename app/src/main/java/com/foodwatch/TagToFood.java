@@ -1,11 +1,5 @@
 package com.foodwatch;
 
-import java.util.Set;
-import java.util.HashSet;
-
-/**
- * Created by MattZhao on 11/14/15.
- */
 public class TagToFood {
     @com.google.gson.annotations.SerializedName("id")
     private String mId;

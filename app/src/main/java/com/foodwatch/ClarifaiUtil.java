@@ -18,8 +18,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.R.attr.data;
-
 public final class ClarifaiUtil {
   private ClarifaiUtil() {
     throw new UnsupportedOperationException("No instances");

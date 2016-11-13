@@ -11,8 +11,6 @@ import android.view.View;
 import com.foodwatch.adapter.RecognizeConceptsAdapter;
 import com.foodwatch.android.starter.api.v2.R;
 
-//import com.clarifai.android.starter.api.v2.R;
-
 public class ResultActivity extends AppCompatActivity {
 
     @NonNull
