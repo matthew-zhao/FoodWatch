@@ -187,7 +187,7 @@ public final class RecognizeConceptsActivity extends BaseActivity {
           showErrorSnackbar(R.string.no_results_from_api);
           return;
         }
-        adapter.setData(predictions.get(0).data());
+        //adapter.setData(predictions.get(0).data());
         imageView.setImageBitmap(BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length));
         Log.d("data", predictions.get(0).data().toString());
 
